@@ -19,6 +19,7 @@ const CreateStorybookPage = () => {
     const [imageFile, setImageFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [generating, setGenerating] = useState(false);
+    const [recentStorybooks, setRecentStorybooks] = useState([]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -31,6 +32,7 @@ const CreateStorybookPage = () => {
 
     useEffect(() => {
         checkAuth();
+        fetchRecentStorybooks();
     }, []);
 
     const checkAuth = async () => {
@@ -48,6 +50,19 @@ const CreateStorybookPage = () => {
             router.push("/login?redirect=/create-storybook");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchRecentStorybooks = async () => {
+        try {
+            const response = await fetch("/api/storybook/history");
+            if (response.ok) {
+                const data = await response.json();
+                // Get last 3 storybooks
+                setRecentStorybooks((data.data || []).slice(0, 3));
+            }
+        } catch (error) {
+            console.error("Failed to fetch history:", error);
         }
     };
 
@@ -111,8 +126,20 @@ const CreateStorybookPage = () => {
 
             const storyData = await generateResponse.json();
 
-            // Redirect to My Storybooks or show success
-            router.push("/my-storybooks");
+            // Deduct credits locally for immediate feedback
+            setUserCredits(prev => prev - STORYBOOK_CREDIT_COST);
+
+            // Refresh recent list to show the new one
+            await fetchRecentStorybooks();
+
+            // Scroll to recent section
+            const recentSection = document.getElementById('recent-storybooks');
+            if (recentSection) {
+                recentSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Reset form slightly? Maybe keep it for next one.
+            alert("Storybook created successfully! Check it out below.");
 
         } catch (error) {
             console.error("Generation error:", error);
@@ -155,18 +182,6 @@ const CreateStorybookPage = () => {
                             Buy Credits Now
                         </button>
                     </div>
-                </div>
-            )}
-
-            {/* Loading Overlay */}
-            {generating && (
-                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-4">
-                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Creating Magic...</h2>
-                    <p className="text-default-300 text-center max-w-md">
-                        Please wait while we weave your story and illustrate your adventure. This may take 2-3 minutes.
-                    </p>
-                    <p className="text-xs text-default-500 mt-8">Do not close this window</p>
                 </div>
             )}
 
@@ -317,13 +332,85 @@ const CreateStorybookPage = () => {
                                 {/* Submit Button */}
                                 <button
                                     type="submit"
-                                    disabled={userCredits < STORYBOOK_CREDIT_COST}
-                                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary-hover hover:to-purple-500 text-white font-bold text-lg shadow-lg shadow-primary/20 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={userCredits < STORYBOOK_CREDIT_COST || generating}
+                                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary-hover hover:to-purple-500 text-white font-bold text-lg shadow-lg shadow-primary/20 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                                 >
-                                    Generate Storybook
+                                    {generating ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                            <span>Weaving Magic... (2-3 mins)</span>
+                                        </>
+                                    ) : (
+                                        "Generate Storybook"
+                                    )}
                                 </button>
                             </form>
                         </div>
+
+                        {/* Recent Storybooks Section */}
+                        {recentStorybooks.length > 0 && (
+                            <div id="recent-storybooks" className="mt-20">
+                                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                                    <IconifyIcon icon="lucide:history" className="text-primary" />
+                                    Recent Creations
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {recentStorybooks.map((book) => (
+                                        <div
+                                            key={book._id}
+                                            className="group relative bg-slate-950/50 border border-white/10 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300"
+                                        >
+                                            {/* Cover Image */}
+                                            <div className="relative h-48 w-full bg-slate-900">
+                                                {book.coverImageUrl ? (
+                                                    <Image
+                                                        src={book.coverImageUrl}
+                                                        alt={book.title}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex items-center justify-center h-full text-default-500">
+                                                        <IconifyIcon icon="lucide:image" className="w-8 h-8" />
+                                                    </div>
+                                                )}
+
+                                                {/* Status Badge */}
+                                                <div className="absolute top-2 right-2">
+                                                    <span className={cn(
+                                                        "px-2 py-1 rounded-full text-[10px] font-semibold backdrop-blur-md border",
+                                                        book.status === 'completed' ? 'bg-green-500/20 border-green-500/30 text-green-400' :
+                                                            book.status === 'failed' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
+                                                                'bg-yellow-500/20 border-yellow-500/30 text-yellow-400'
+                                                    )}>
+                                                        {book.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className="p-4">
+                                                <h3 className="text-lg font-bold text-white line-clamp-1 mb-1">{book.title}</h3>
+                                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                                                    <span className="text-xs text-default-500">{new Date(book.createdAt).toLocaleDateString()}</span>
+                                                    {book.status === 'completed' && book.pdfUrl && (
+                                                        <a
+                                                            href={book.pdfUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-xs text-primary hover:text-white flex items-center gap-1"
+                                                        >
+                                                            <IconifyIcon icon="lucide:download" className="w-3 h-3" />
+                                                            Download
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>

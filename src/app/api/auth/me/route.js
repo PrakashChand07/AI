@@ -14,7 +14,7 @@ export async function GET(request) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
         }
 
-        const user = await User.findOne({ _id: userId }).select("-password");
+        const user = await User.findOne({ _id: userId }).select("-password -forgotPasswordToken -forgotPasswordTokenExpiry -verifyToken -verifyTokenExpiry");
 
         if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 })
