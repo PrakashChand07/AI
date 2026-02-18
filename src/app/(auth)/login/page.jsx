@@ -1,12 +1,53 @@
+
+"use client";
 import AuthImage from "@/components/AuthImage";
 import ThirdPartyLogin from "@/components/ThirdPartyLogin";
 import Image from "next/image";
 import Link from "next/link";
 import logo from '@/assets/images/logo.png';
-export const metadata = {
-  title: "Login"
-};
-const Login = () => {
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+const LoginContent = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
+
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
+  })
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const onLogin = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      });
+      const data = await response.json();
+      if (data.success) {
+        console.log("Login success", data);
+        router.push(redirect);
+      } else {
+        console.log("Login failed", data.error);
+        setError(data.error);
+      }
+    } catch (error) {
+      console.log("Login failed", error.message);
+      setError("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return <>
     <div className="backdrop-blur-2xl bg-default-950/40 rounded-2xl overflow-hidden max-w-5xl mx-auto">
       <div className="grid lg:grid-cols-2 gap-10">
@@ -20,14 +61,33 @@ const Login = () => {
           <div className="pb6 my-auto">
             <h4 className="text-2xl font-bold text-white mb-4">Get Started Now</h4>
             <p className="text-default-300 mb-8 max-w-sm ">Enter your email address and password to access account.</p>
-            <form action="#" className="text-start">
+
+            {error && <div className="mb-4 text-red-500">{error}</div>}
+
+            <form onSubmit={onLogin} className="text-start">
               <div className="mb-4">
                 <label htmlFor="emailaddress" className="block text-base/normal font-semibold text-default-200 mb-2">Email address</label>
-                <input className="block w-full rounded py-1.5 px-3 bg-transparent border-white/10 border-default-200 text-white/80 focus:border-white/25 focus:ring-transparent" type="email" id="emailaddress" required placeholder="Enter your email" />
+                <input
+                  className="block w-full rounded py-1.5 px-3 bg-transparent border-white/10 border-default-200 text-white/80 focus:border-white/25 focus:ring-transparent"
+                  type="email"
+                  id="emailaddress"
+                  required
+                  placeholder="Enter your email"
+                  value={user.email}
+                  onChange={(e) => setUser({ ...user, email: e.target.value })}
+                />
               </div>
               <div className="mb-4">
                 <label htmlFor="password" className="block text-base/normal font-semibold text-default-200 mb-2">Password</label>
-                <input className="block w-full rounded py-1.5 px-3 bg-transparent border-white/10 border-default-200 text-white/80 focus:border-white/25 focus:ring-transparent" type="password" required id="password" placeholder="Enter your password" />
+                <input
+                  className="block w-full rounded py-1.5 px-3 bg-transparent border-white/10 border-default-200 text-white/80 focus:border-white/25 focus:ring-transparent"
+                  type="password"
+                  required
+                  id="password"
+                  placeholder="Enter your password"
+                  value={user.password}
+                  onChange={(e) => setUser({ ...user, password: e.target.value })}
+                />
               </div>
               <div className="mb-6">
                 <div className="flex flex-wrap items-center justify-between gap-y-1">
@@ -39,7 +99,7 @@ const Login = () => {
                 </div>
               </div>
               <div className="mb-6 text-center">
-                <button className="w-full inline-flex items-center justify-center px-6 py-2 backdrop-blur-2xl bg-primary-600/90 text-white rounded-lg transition-all duration-500 group hover:bg-primary-600 mt-5" type="submit"><span className="fw-bold">Sign In</span> </button>
+                <button className="w-full inline-flex items-center justify-center px-6 py-2 backdrop-blur-2xl bg-primary-600/90 text-white rounded-lg transition-all duration-500 group hover:bg-primary-600 mt-5" type="submit"><span className="fw-bold">{loading ? "Processing..." : "Sign In"}</span> </button>
               </div>
             </form>
           </div>
@@ -52,4 +112,13 @@ const Login = () => {
     </div>
   </>;
 };
+
+const Login = () => {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
+  );
+};
+
 export default Login;
