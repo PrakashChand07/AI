@@ -8,7 +8,7 @@ import Image from "next/image";
 import logo from '@/assets/images/logo.png';
 import useScrollEvent from "@/hooks/useScrollEvent";
 const TopNavbar = ({
-  navLinks
+  navLinks = []
 }) => {
   const navRef = useRef(null);
   const {
@@ -22,7 +22,7 @@ const TopNavbar = ({
     checkAuth();
     document.body.classList.add('bg-default-900');
     try {
-      if (navRef.current && typeof window !== 'undefined') {
+      if (navRef.current && typeof window !== 'undefined' && window.location.pathname === '/') {
         const navLinks = document.querySelectorAll('.navbar-nav a');
         if (navLinks.length > 0) {
           new Gumshoe('.navbar-nav a', {
