@@ -3,7 +3,7 @@ import { getDataFromToken } from "@/helpers/getDataFromToken";
 import User from "@/models/userModel";
 import Storybook from "@/models/storybookModel";
 import { NextResponse } from "next/server";
-import { uploadFromUrl } from "@/helpers/cloudinary";
+import { uploadToGCSFromUrl } from "@/helpers/gcs";
 
 connect();
 
@@ -95,13 +95,13 @@ export async function POST(request) {
             // Ideally should be async or background, but doing inline for simplicity as per plan
 
             // Upload PDF
-            const pdfUpload = await uploadFromUrl(ziftoData.pdf_url, "storybook-pdfs");
+            const pdfUpload = await uploadToGCSFromUrl(ziftoData.pdf_url, "storybook-pdfs");
 
             // Upload Cover (if available)
             let coverUpload = { url: "" };
             if (ziftoData.cover_image_url) {
                 // Ensure cover is a PNG for better compatibility
-                coverUpload = await uploadFromUrl(ziftoData.cover_image_url, "storybook-covers", "png");
+                coverUpload = await uploadToGCSFromUrl(ziftoData.cover_image_url, "storybook-covers");
             }
 
             // 5. Update Record & Deduct Credits
@@ -124,9 +124,9 @@ export async function POST(request) {
         } catch (apiError) {
             console.error("Storybook Generation Error:", apiError);
 
-            // FALLBACK: If Cloudinary fails but we have Zifto URL, save that instead
-            if (apiError.message.includes("Cloudinary") && ziftoData?.pdf_url) {
-                console.log("Cloudinary upload failed, using fallback Zifto URL");
+            // FALLBACK: If GCS fails but we have Zifto URL, save that instead
+            if (ziftoData?.pdf_url) {
+                console.log("GCS upload failed, using fallback Zifto URL");
 
                 newStorybook.pdfUrl = ziftoData.pdf_url;
                 newStorybook.coverImageUrl = ziftoData.cover_image_url || ""; // Use Zifto cover if available
@@ -134,7 +134,7 @@ export async function POST(request) {
                 newStorybook.status = "completed";
                 newStorybook.creditsUsed = STORYBOOK_CREDIT_COST;
                 // Save specific warning
-                newStorybook.ziftoApiStatus = { warning: "Cloudinary upload failed, using direct link. " + apiError.message };
+                newStorybook.ziftoApiStatus = { warning: "GCS upload failed, using direct link. " + apiError.message };
 
                 await newStorybook.save();
 

@@ -61,7 +61,7 @@ const CreateStorybookPage = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: name === 'pages' ? parseInt(value) : value }));
     };
 
     const handleSubmit = async (e) => {
