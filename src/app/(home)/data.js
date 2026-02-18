@@ -121,8 +121,9 @@ export const footerLinks = [
         title: 'Product',
         links: [
             { name: 'Features', url: '#features' },
-            { name: 'Pricing', url: '#price' },
-            { name: 'Generator', url: '#generator' }
+            { name: 'Pricing', url: '/buy-credits' },
+            { name: 'Create Storybook', url: '/create-storybook' },
+            { name: 'My Storybooks', url: '/my-storybooks' }
         ]
     },
     {
