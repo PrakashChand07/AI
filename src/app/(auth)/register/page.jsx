@@ -1,12 +1,54 @@
+
+"use client";
 import AuthImage from "@/components/AuthImage";
 import Link from "next/link";
 import ThirdPartyLogin from "@/components/ThirdPartyLogin";
 import Image from "next/image";
 import logo from '@/assets/images/logo.png';
-export const metadata = {
-  title: "Register"
-};
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 const Register = () => {
+  const router = useRouter();
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+  })
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const onSignup = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError("");
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      });
+      const data = await response.json();
+      console.log("Signup success", data);
+
+      if (data.success) {
+        router.push(`/verifyemail?email=${encodeURIComponent(user.email)}`);
+      } else {
+        console.log("Signup failed", data.error);
+        setError(data.error);
+      }
+
+    } catch (error) {
+      console.log("Signup failed", error.message);
+      setError("Signup failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return <>
     <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl bg-default-950/40 backdrop-blur-2xl">
       <div className="grid gap-10 lg:grid-cols-2">
@@ -22,18 +64,48 @@ const Register = () => {
             <p className="mb-8 max-w-sm text-default-300">
               Enter your email address and password to access account.
             </p>
-            <form action="#" className="text-start">
+
+            {error && (
+              <div className="mb-4 p-2 bg-red-500/20 text-red-500 rounded text-center">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={onSignup} className="text-start">
               <div className="mb-4">
                 <label htmlFor="input-label" className="mb-2 block text-base/normal font-semibold text-default-200">Your Name</label>
-                <input type="text" id="input-label" className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent" placeholder="Your Name" />
+                <input
+                  type="text"
+                  id="input-label"
+                  className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent"
+                  placeholder="Your Name"
+                  value={user.username}
+                  onChange={(e) => setUser({ ...user, username: e.target.value })}
+                />
               </div>
               <div className="mb-4">
                 <label htmlFor="emailaddress" className="mb-2 block text-base/normal font-semibold text-default-200">Email address</label>
-                <input className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent" type="email" id="emailaddress" required placeholder="Enter your email" />
+                <input
+                  className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent"
+                  type="email"
+                  id="emailaddress"
+                  required
+                  placeholder="Enter your email"
+                  value={user.email}
+                  onChange={(e) => setUser({ ...user, email: e.target.value })}
+                />
               </div>
               <div className="mb-4">
                 <label htmlFor="password" className="mb-2 block text-base/normal font-semibold text-default-200">Password</label>
-                <input className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent" type="password" required id="password" placeholder="Enter your password" />
+                <input
+                  className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent"
+                  type="password"
+                  required
+                  id="password"
+                  placeholder="Enter your password"
+                  value={user.password}
+                  onChange={(e) => setUser({ ...user, password: e.target.value })}
+                />
               </div>
               <div className="mb-6">
                 <input type="checkbox" className="text-primary-600 focus:border-primary-300 h-4 w-4 rounded border-white/20 bg-white/20 text-primary shadow-sm focus:ring focus:ring-primary/60 focus:ring-offset-0" id="checkbox-signin" />
@@ -41,7 +113,7 @@ const Register = () => {
               </div>
               <div className="mb-6 text-center">
                 <button className="bg-primary-600/90 hover:bg-primary-600 group mt-5 inline-flex w-full items-center justify-center rounded-lg px-6 py-2 text-white backdrop-blur-2xl transition-all duration-500" type="submit">
-                  <span className="fw-bold">Sign Up</span>
+                  <span className="fw-bold">{loading ? "Processing" : "Sign Up"}</span>
                 </button>
               </div>
             </form>
