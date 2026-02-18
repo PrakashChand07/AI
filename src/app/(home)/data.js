@@ -1,10 +1,9 @@
 
 export const navLinks = [
     { label: "Home", link: "/" },
-    { label: "Features", link: "#features" },
-    { label: "Generator", link: "#generator" },
-    { label: "Pricing", link: "#price" },
-    { label: "FAQ", link: "#faq" }
+    { label: "Create Storybook", link: "/create-storybook" },
+    { label: "My Storybooks", link: "/my-storybooks" },
+    { label: "Buy Credits", link: "/buy-credits" },
 ];
 
 export const features = [
@@ -118,28 +117,28 @@ export const faqs = [
 ];
 
 export const footerLinks = [
-  {
-    title: 'Product',
-    links: [
-      { name: 'Features', url: '#features' },
-      { name: 'Pricing', url: '#price' },
-      { name: 'Generator', url: '#generator' }
-    ]
-  },
-  {
-    title: 'Company',
-    links: [
-      { name: 'About Us', url: '#' },
-      { name: 'Careers', url: '#' },
-      { name: 'Contact', url: '#' }
-    ]
-  },
-  {
-    title: 'Resources',
-    links: [
-      { name: 'Blog', url: '#' },
-      { name: 'Help Center', url: '#' },
-      { name: 'API Docs', url: '#' }
-    ]
-  }
+    {
+        title: 'Product',
+        links: [
+            { name: 'Features', url: '#features' },
+            { name: 'Pricing', url: '#price' },
+            { name: 'Generator', url: '#generator' }
+        ]
+    },
+    {
+        title: 'Company',
+        links: [
+            { name: 'About Us', url: '#' },
+            { name: 'Careers', url: '#' },
+            { name: 'Contact', url: '#' }
+        ]
+    },
+    {
+        title: 'Resources',
+        links: [
+            { name: 'Blog', url: '#' },
+            { name: 'Help Center', url: '#' },
+            { name: 'API Docs', url: '#' }
+        ]
+    }
 ];
