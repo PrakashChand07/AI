@@ -1,0 +1,334 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Background2 from "@/components/Background2";
+import TopNavbar from "@/components/TopNavbar";
+import { navLinks } from "../(home)/data";
+import IconifyIcon from "@/components/wrappers/IconifyIcon";
+import { cn } from "@/helpers/cn";
+
+const STORYBOOK_CREDIT_COST = 2;
+
+const CreateStorybookPage = () => {
+    const router = useRouter();
+    const [loading, setLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userCredits, setUserCredits] = useState(0);
+    const [imageFile, setImageFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [generating, setGenerating] = useState(false);
+
+    // Form State
+    const [formData, setFormData] = useState({
+        storyline: "",
+        character_name: "",
+        age: "",
+        gender: "boy",
+        pages: 4
+    });
+
+    useEffect(() => {
+        checkAuth();
+    }, []);
+
+    const checkAuth = async () => {
+        try {
+            const response = await fetch("/api/auth/me");
+            if (response.ok) {
+                const data = await response.json();
+                setIsAuthenticated(true);
+                setUserCredits(data.data.credits || 0);
+            } else {
+                router.push("/login?redirect=/create-storybook");
+            }
+        } catch (error) {
+            console.error("Auth check failed:", error);
+            router.push("/login?redirect=/create-storybook");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (userCredits < STORYBOOK_CREDIT_COST) {
+            // Show credit warning handled by render
+            return;
+        }
+
+        if (!imageFile) {
+            alert("Please upload a child's photo");
+            return;
+        }
+
+        try {
+            setGenerating(true);
+
+            // 1. Upload Image
+            const uploadFormData = new FormData();
+            uploadFormData.append("file", imageFile);
+
+            const uploadResponse = await fetch("/api/upload", {
+                method: "POST",
+                body: uploadFormData
+            });
+
+            if (!uploadResponse.ok) throw new Error("Image upload failed");
+
+            const uploadData = await uploadResponse.json();
+            const imageUrl = uploadData.url;
+
+            // 2. Generate Storybook
+            const generateResponse = await fetch("/api/storybook/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...formData,
+                    uploaded_image_url: imageUrl
+                })
+            });
+
+            if (!generateResponse.ok) {
+                const errorData = await generateResponse.json();
+                throw new Error(errorData.error || "Generation failed");
+            }
+
+            const storyData = await generateResponse.json();
+
+            // Redirect to My Storybooks or show success
+            router.push("/my-storybooks");
+
+        } catch (error) {
+            console.error("Generation error:", error);
+            alert(`Error: ${error.message}`);
+        } finally {
+            setGenerating(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-900">
+                <div className="text-white text-xl">Loading...</div>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            <Background2 />
+            <TopNavbar navLinks={navLinks} />
+
+            {/* Credit Warning Modal */}
+            {userCredits < STORYBOOK_CREDIT_COST && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-slate-900 border border-white/10 rounded-2xl p-8 max-w-md w-full text-center relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
+                        <div className="mx-auto bg-red-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                            <IconifyIcon icon="lucide:alert-circle" className="text-red-500 w-8 h-8" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Insufficient Credits</h3>
+                        <p className="text-default-300 mb-6">
+                            You need <span className="text-white font-bold">{STORYBOOK_CREDIT_COST} credits</span> to generate a storybook.
+                            Your current balance is <span className="text-red-400 font-bold">{userCredits} credits</span>.
+                        </p>
+                        <button
+                            onClick={() => router.push('/buy-credits')}
+                            className="w-full py-3 px-6 rounded-lg bg-primary hover:bg-primary-hover text-white font-medium transition-all"
+                        >
+                            Buy Credits Now
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Loading Overlay */}
+            {generating && (
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-4">
+                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
+                    <h2 className="text-2xl font-bold text-white mb-2">Creating Magic...</h2>
+                    <p className="text-default-300 text-center max-w-md">
+                        Please wait while we weave your story and illustrate your adventure. This may take 2-3 minutes.
+                    </p>
+                    <p className="text-xs text-default-500 mt-8">Do not close this window</p>
+                </div>
+            )}
+
+            <section className="py-32 relative">
+                <div className="container">
+                    <div className="max-w-3xl mx-auto">
+                        <div className="text-center mb-12">
+                            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                                Create Your Storybook
+                            </h1>
+                            <p className="text-lg text-default-300">
+                                Turn your child into the hero of their own magical adventure.
+                            </p>
+                            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                                <IconifyIcon icon="lucide:coins" className="text-yellow-400" />
+                                <span className="text-sm text-default-200">Cost: 2 Credits</span>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-950/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 md:p-8">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                {/* Image Upload */}
+                                <div>
+                                    <label className="block text-sm font-medium text-default-300 mb-2">
+                                        Child's Photo (Front Facing)
+                                    </label>
+                                    <div className="relative group">
+                                        <div className={cn(
+                                            "border-2 border-dashed border-white/10 rounded-xl p-8 transition-all text-center cursor-pointer hover:border-primary/50 hover:bg-white/5",
+                                            previewUrl ? "border-primary" : ""
+                                        )}>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageChange}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            />
+                                            {previewUrl ? (
+                                                <div className="relative h-48 w-full max-w-xs mx-auto">
+                                                    <Image
+                                                        src={previewUrl}
+                                                        alt="Preview"
+                                                        fill
+                                                        className="object-cover rounded-lg"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                                                        <IconifyIcon icon="lucide:upload-cloud" className="w-6 h-6 text-default-400" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-white font-medium">Click to upload photo</p>
+                                                        <p className="text-xs text-default-400 mt-1">JPG, PNG up to 10MB</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Character Name */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-default-300 mb-2">
+                                            Character Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="character_name"
+                                            value={formData.character_name}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                            placeholder="e.g. Sanu"
+                                        />
+                                    </div>
+
+                                    {/* Age */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-default-300 mb-2">
+                                            Age
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="age"
+                                            value={formData.age}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                            placeholder="e.g. 7"
+                                        />
+                                    </div>
+
+                                    {/* Gender */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-default-300 mb-2">
+                                            Gender
+                                        </label>
+                                        <select
+                                            name="gender"
+                                            value={formData.gender}
+                                            onChange={handleInputChange}
+                                            className="w-full bg-slate-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        >
+                                            <option value="boy">Boy</option>
+                                            <option value="girl">Girl</option>
+                                            <option value="child">Child (Neutral)</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Pages */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-default-300 mb-2">
+                                            Pages
+                                        </label>
+                                        <select
+                                            name="pages"
+                                            value={formData.pages}
+                                            onChange={handleInputChange}
+                                            className="w-full bg-slate-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                        >
+                                            <option value="4">4 Pages</option>
+                                            <option value="8">8 Pages</option>
+                                            <option value="12">12 Pages</option>
+                                            <option value="16">16 Pages</option>
+                                            <option value="20">20 Pages</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Storyline */}
+                                <div>
+                                    <label className="block text-sm font-medium text-default-300 mb-2">
+                                        Story Idea / Theme
+                                    </label>
+                                    <textarea
+                                        name="storyline"
+                                        value={formData.storyline}
+                                        onChange={handleInputChange}
+                                        required
+                                        rows={4}
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+                                        placeholder="Describe the adventure... (e.g. A journey to the moon to meet cheese aliens)"
+                                    ></textarea>
+                                </div>
+
+                                {/* Submit Button */}
+                                <button
+                                    type="submit"
+                                    disabled={userCredits < STORYBOOK_CREDIT_COST}
+                                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary-hover hover:to-purple-500 text-white font-bold text-lg shadow-lg shadow-primary/20 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Generate Storybook
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </>
+    );
+};
+
+export default CreateStorybookPage;
