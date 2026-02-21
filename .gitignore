@@ -25,12 +25,17 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+<<<<<<< HEAD
 # local env files — NEVER push these to GitHub
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+=======
+# local env files
+.env
+>>>>>>> 0c36702a638dee5d32d93916102081737262e9e4
 
 # vercel
 .vercel
