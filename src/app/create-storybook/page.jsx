@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Background2 from "@/components/Background2";
@@ -14,7 +14,6 @@ const STORYBOOK_CREDIT_COST = 2;
 const CreateStorybookPage = () => {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userCredits, setUserCredits] = useState(0);
     const [imageFile, setImageFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
@@ -33,14 +32,13 @@ const CreateStorybookPage = () => {
     useEffect(() => {
         checkAuth();
         fetchRecentStorybooks();
-    }, []);
+    }, [checkAuth]);
 
-    const checkAuth = async () => {
+    const checkAuth = useCallback(async () => {
         try {
             const response = await fetch("/api/auth/me");
             if (response.ok) {
                 const data = await response.json();
-                setIsAuthenticated(true);
                 setUserCredits(data.data.credits || 0);
             } else {
                 router.push("/login?redirect=/create-storybook");
@@ -51,7 +49,7 @@ const CreateStorybookPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
 
     const fetchRecentStorybooks = async () => {
         try {
@@ -124,7 +122,7 @@ const CreateStorybookPage = () => {
                 throw new Error(errorData.error || "Generation failed");
             }
 
-            const storyData = await generateResponse.json();
+            await generateResponse.json();
 
             // Deduct credits locally for immediate feedback
             setUserCredits(prev => prev - STORYBOOK_CREDIT_COST);
@@ -206,7 +204,7 @@ const CreateStorybookPage = () => {
                                 {/* Image Upload */}
                                 <div>
                                     <label className="block text-sm font-medium text-default-300 mb-2">
-                                        Child's Photo (Front Facing)
+                                        Child&apos;s Photo (Front Facing)
                                     </label>
                                     <div className="relative group">
                                         <div className={cn(
