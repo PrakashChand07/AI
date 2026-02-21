@@ -15,9 +15,18 @@ const Register = () => {
     email: "",
     password: "",
   })
-  const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Disable button if any field is empty
+  useEffect(() => {
+    if (user.username.length > 0 && user.email.length > 0 && user.password.length > 0) {
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  }, [user]);
 
   const onSignup = async (e) => {
     e.preventDefault();

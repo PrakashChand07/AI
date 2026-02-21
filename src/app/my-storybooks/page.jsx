@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,9 +17,9 @@ const MyStorybooksPage = () => {
 
     useEffect(() => {
         fetchStorybooks();
-    }, [fetchStorybooks]);
+    }, []);
 
-    const fetchStorybooks = useCallback(async () => {
+    const fetchStorybooks = async () => {
         try {
             const response = await fetch("/api/storybook/history");
             if (response.ok) {
@@ -33,7 +33,7 @@ const MyStorybooksPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [router]);
+    };
 
     if (loading) {
         return (
@@ -73,7 +73,7 @@ const MyStorybooksPage = () => {
                             </div>
                             <h3 className="text-xl font-semibold text-white mb-2">No Storybooks Yet</h3>
                             <p className="text-default-400 mb-8 max-w-sm mx-auto">
-                                You haven&apos;t created any storybooks yet. Start your first magical journey today!
+                                You haven't created any storybooks yet. Start your first magical journey today!
                             </p>
                             <Link
                                 href="/create-storybook"
