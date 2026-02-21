@@ -12,7 +12,7 @@ export async function connect() {
     mongoose.connection.setMaxListeners(20);
 
     try {
-        await mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/webai');
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/webai');
 
         isConnected = true;
 
