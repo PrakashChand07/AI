@@ -89,7 +89,7 @@ export async function POST(request) {
                 throw new Error("Zifto API returned failed status or missing PDF URL");
             }
 
-            // 4. Upload Result to Cloudinary (PDF & Cover)
+            // 4. Upload Result to GCS (PDF & Cover)
             console.log("Original Zifto PDF URL:", ziftoData.pdf_url);
 
             // Ideally should be async or background, but doing inline for simplicity as per plan

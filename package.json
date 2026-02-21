@@ -17,7 +17,6 @@
     "@types/aos": "^3.0.7",
     "aos": "^2.3.4",
     "bcryptjs": "^3.0.3",
-    "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "glightbox": "^3.3.0",
     "gumshoejs": "^5.1.2",
