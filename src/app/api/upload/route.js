@@ -1,7 +1,7 @@
 import { connect } from "@/helpers/dbConfig";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import { NextResponse } from "next/server";
-import { uploadFile } from "@/helpers/cloudinary";
+import { uploadToGCSFromBuffer } from "@/helpers/gcs";
 
 connect();
 
@@ -21,9 +21,11 @@ export async function POST(request) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
+        const filename = `storybook-child-photos/${Date.now()}-${file.name || "upload"}`;
+        const contentType = file.type || "application/octet-stream";
 
-        // Upload to Cloudinary
-        const result = await uploadFile(buffer, "storybook-child-photos");
+        // Upload to Google Cloud Storage
+        const result = await uploadToGCSFromBuffer(buffer, filename, contentType);
 
         return NextResponse.json({
             message: "File uploaded successfully",
