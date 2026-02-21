@@ -32,7 +32,7 @@ const storybookSchema = new mongoose.Schema({
         default: 4,
     },
     pdfUrl: {
-        type: String, // Cloudinary URL
+        type: String,
     },
     coverImageUrl: {
         type: String,
