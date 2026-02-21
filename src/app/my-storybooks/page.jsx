@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,11 +15,7 @@ const MyStorybooksPage = () => {
     const [loading, setLoading] = useState(true);
     const [storybooks, setStorybooks] = useState([]);
 
-    useEffect(() => {
-        fetchStorybooks();
-    }, []);
-
-    const fetchStorybooks = async () => {
+    const fetchStorybooks = useCallback(async () => {
         try {
             const response = await fetch("/api/storybook/history");
             if (response.ok) {
@@ -33,7 +29,11 @@ const MyStorybooksPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
+
+    useEffect(() => {
+        fetchStorybooks();
+    }, [fetchStorybooks]);
 
     if (loading) {
         return (
@@ -73,7 +73,7 @@ const MyStorybooksPage = () => {
                             </div>
                             <h3 className="text-xl font-semibold text-white mb-2">No Storybooks Yet</h3>
                             <p className="text-default-400 mb-8 max-w-sm mx-auto">
-                                You haven't created any storybooks yet. Start your first magical journey today!
+                                You haven&apos;t created any storybooks yet. Start your first magical journey today!
                             </p>
                             <Link
                                 href="/create-storybook"
@@ -146,14 +146,12 @@ const MyStorybooksPage = () => {
                                                             const a = document.createElement('a');
                                                             a.style.display = 'none';
                                                             a.href = url;
-                                                            // Name the file based on title or ID
                                                             a.download = `${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'storybook'}.pdf`;
                                                             document.body.appendChild(a);
                                                             a.click();
                                                             window.URL.revokeObjectURL(url);
                                                         } catch (error) {
                                                             console.error('Download failed:', error);
-                                                            // Fallback to opening in new tab if fetch fails (CORS etc)
                                                             window.open(book.pdfUrl, '_blank');
                                                         }
                                                     }}
