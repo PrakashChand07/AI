@@ -53,6 +53,10 @@ const storybookSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    expiresAt: {
+        type: Date,
+        default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day from creation
+    },
 });
 
 const Storybook = mongoose.models.storybooks || mongoose.model("storybooks", storybookSchema);

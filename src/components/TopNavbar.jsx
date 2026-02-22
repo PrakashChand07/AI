@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Gumshoe from 'gumshoejs';
 import IconifyIcon from "./wrappers/IconifyIcon";
 import Link from "next/link";
@@ -18,6 +18,19 @@ const TopNavbar = ({
   const [loading, setLoading] = useState(true);
   const [userCredits, setUserCredits] = useState(0);
 
+  // Refresh credits from API
+  const refreshCredits = useCallback(async () => {
+    try {
+      const response = await fetch("/api/auth/me");
+      if (response.ok) {
+        const data = await response.json();
+        setUserCredits(data.data.credits || 0);
+      }
+    } catch (error) {
+      console.error("Credits refresh failed", error);
+    }
+  }, []);
+
   useEffect(() => {
     checkAuth();
     document.body.classList.add('bg-default-900');
@@ -33,10 +46,22 @@ const TopNavbar = ({
     } catch (error) {
       console.log('Gumshoe initialization skipped:', error.message);
     }
+
+    // Listen for credits-updated event (fired from any page when credits change)
+    const handleCreditsUpdate = (e) => {
+      if (e.detail?.credits !== undefined) {
+        setUserCredits(e.detail.credits);
+      } else {
+        refreshCredits();
+      }
+    };
+    window.addEventListener('credits-updated', handleCreditsUpdate);
+
     return () => {
       document.body.classList.remove('bg-default-900');
+      window.removeEventListener('credits-updated', handleCreditsUpdate);
     };
-  }, []);
+  }, [refreshCredits]);
 
   const checkAuth = async () => {
     try {

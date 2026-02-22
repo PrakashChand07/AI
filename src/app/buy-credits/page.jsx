@@ -194,6 +194,8 @@ const BuyCreditsPage = () => {
                             const data = await verifyResponse.json();
                             alert(`Payment successful! ${plan.credits} credits added to your account.`);
                             setUserCredits(data.credits);
+                            // Notify navbar to update credits in real-time
+                            window.dispatchEvent(new CustomEvent('credits-updated', { detail: { credits: data.credits } }));
                             router.push("/");
                         } else {
                             const errorData = await verifyResponse.json();

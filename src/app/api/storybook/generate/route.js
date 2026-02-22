@@ -57,7 +57,7 @@ export async function POST(request) {
         // For now, assuming standard environment or long-running capability.
 
         try {
-            const ziftoResponse = await fetch("https://createstorybook-slonnosm2a-uc.a.run.app", {
+            const ziftoResponse = await fetch(process.env.ZIFTO_API_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
