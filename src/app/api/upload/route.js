@@ -1,10 +1,16 @@
 import { connect } from "@/helpers/dbConfig";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
 
 connect();
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(request) {
     try {
@@ -22,21 +28,17 @@ export async function POST(request) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const uniqueName = `${Date.now()}-${file.name || "upload"}`;
+        const base64Image = `data:${file.type || "image/jpeg"};base64,${buffer.toString("base64")}`;
 
-        // Save to public/uploads folder
-        const uploadsDir = path.join(process.cwd(), "public", "uploads");
-        await mkdir(uploadsDir, { recursive: true });
-
-        const filePath = path.join(uploadsDir, uniqueName);
-        await writeFile(filePath, buffer);
-
-        // Return the public URL (works for local dev)
-        const url = `/uploads/${uniqueName}`;
+        // Upload to Cloudinary (publicly accessible URL)
+        const uploadResult = await cloudinary.uploader.upload(base64Image, {
+            folder: "storybook-child-photos",
+            public_id: `storybook-${Date.now()}`,
+        });
 
         return NextResponse.json({
             message: "File uploaded successfully",
-            url: url
+            url: uploadResult.secure_url
         });
 
     } catch (error) {
