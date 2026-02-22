@@ -3,7 +3,6 @@ import { getDataFromToken } from "@/helpers/getDataFromToken";
 import User from "@/models/userModel";
 import Storybook from "@/models/storybookModel";
 import { NextResponse } from "next/server";
-import { uploadToGCSFromUrl } from "@/helpers/gcs";
 
 connect();
 
@@ -57,8 +56,6 @@ export async function POST(request) {
         // If deployment platform has short timeouts, we might need a background job.
         // For now, assuming standard environment or long-running capability.
 
-        let ziftoData = null;
-
         try {
             const ziftoResponse = await fetch("https://createstorybook-slonnosm2a-uc.a.run.app", {
                 method: "POST",
@@ -73,7 +70,7 @@ export async function POST(request) {
                     gender,
                     pages: Number(pages),
                     branding: {
-                        watermark: "CREATED BY ZIFTO" // or Custom branding
+                        watermark: "CREATED BY ZIFTO"
                     }
                 }),
             });
@@ -83,35 +80,21 @@ export async function POST(request) {
                 throw new Error(`Zifto API Error: ${ziftoResponse.status} - ${errorData}`);
             }
 
-            ziftoData = await ziftoResponse.json();
+            const ziftoData = await ziftoResponse.json();
 
             if (!ziftoData.success || !ziftoData.pdf_url) {
                 throw new Error("Zifto API returned failed status or missing PDF URL");
             }
 
-            // 4. Upload Result to GCS (PDF & Cover)
-            console.log("Original Zifto PDF URL:", ziftoData.pdf_url);
-
-            // Ideally should be async or background, but doing inline for simplicity as per plan
-
-            // Upload PDF
-            const pdfUpload = await uploadToGCSFromUrl(ziftoData.pdf_url, "storybook-pdfs");
-
-            // Upload Cover (if available)
-            let coverUpload = { url: "" };
-            if (ziftoData.cover_image_url) {
-                // Ensure cover is a PNG for better compatibility
-                coverUpload = await uploadToGCSFromUrl(ziftoData.cover_image_url, "storybook-covers");
-            }
-
-            // 5. Update Record & Deduct Credits
-            newStorybook.pdfUrl = pdfUpload.url;
-            newStorybook.coverImageUrl = coverUpload.url;
+            // 4. Save Zifto URLs directly (no GCS needed)
+            newStorybook.pdfUrl = ziftoData.pdf_url;
+            newStorybook.coverImageUrl = ziftoData.cover_image_url || "";
             newStorybook.title = ziftoData.story?.title || "My Adventure";
             newStorybook.status = "completed";
             newStorybook.creditsUsed = STORYBOOK_CREDIT_COST;
             await newStorybook.save();
 
+            // 5. Deduct Credits
             user.credits -= STORYBOOK_CREDIT_COST;
             await user.save();
 
@@ -123,31 +106,6 @@ export async function POST(request) {
 
         } catch (apiError) {
             console.error("Storybook Generation Error:", apiError);
-
-            // FALLBACK: If GCS fails but we have Zifto URL, save that instead
-            if (ziftoData?.pdf_url) {
-                console.log("GCS upload failed, using fallback Zifto URL");
-
-                newStorybook.pdfUrl = ziftoData.pdf_url;
-                newStorybook.coverImageUrl = ziftoData.cover_image_url || ""; // Use Zifto cover if available
-                newStorybook.title = ziftoData.story?.title || "My Adventure";
-                newStorybook.status = "completed";
-                newStorybook.creditsUsed = STORYBOOK_CREDIT_COST;
-                // Save specific warning
-                newStorybook.ziftoApiStatus = { warning: "GCS upload failed, using direct link. " + apiError.message };
-
-                await newStorybook.save();
-
-                user.credits -= STORYBOOK_CREDIT_COST;
-                await user.save();
-
-                return NextResponse.json({
-                    message: "Storybook created successfully (Storage Limit Reached - Using Direct Link)",
-                    data: newStorybook,
-                    remainingCredits: user.credits,
-                    warning: "Storage limit reached. PDF link may expire sooner."
-                });
-            }
 
             newStorybook.status = "failed";
             newStorybook.ziftoApiStatus = { error: apiError.message };

@@ -1,7 +1,8 @@
 import { connect } from "@/helpers/dbConfig";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import { NextResponse } from "next/server";
-import { uploadToGCSFromBuffer } from "@/helpers/gcs";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 
 connect();
 
@@ -21,15 +22,21 @@ export async function POST(request) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const filename = `storybook-child-photos/${Date.now()}-${file.name || "upload"}`;
-        const contentType = file.type || "application/octet-stream";
+        const uniqueName = `${Date.now()}-${file.name || "upload"}`;
 
-        // Upload to Google Cloud Storage
-        const result = await uploadToGCSFromBuffer(buffer, filename, contentType);
+        // Save to public/uploads folder
+        const uploadsDir = path.join(process.cwd(), "public", "uploads");
+        await mkdir(uploadsDir, { recursive: true });
+
+        const filePath = path.join(uploadsDir, uniqueName);
+        await writeFile(filePath, buffer);
+
+        // Return the public URL (works for local dev)
+        const url = `/uploads/${uniqueName}`;
 
         return NextResponse.json({
             message: "File uploaded successfully",
-            url: result.url
+            url: url
         });
 
     } catch (error) {
