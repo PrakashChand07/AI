@@ -94,14 +94,17 @@ export async function POST(request) {
             newStorybook.creditsUsed = STORYBOOK_CREDIT_COST;
             await newStorybook.save();
 
-            // 5. Deduct Credits
-            user.credits -= STORYBOOK_CREDIT_COST;
-            await user.save();
+            // 5. Deduct Credits (atomic operation - guaranteed to work)
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { $inc: { credits: -STORYBOOK_CREDIT_COST } },
+                { new: true }
+            );
 
             return NextResponse.json({
                 message: "Storybook created successfully",
                 data: newStorybook,
-                remainingCredits: user.credits
+                remainingCredits: updatedUser.credits
             });
 
         } catch (apiError) {
