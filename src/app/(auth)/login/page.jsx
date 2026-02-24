@@ -1,30 +1,31 @@
-
 "use client";
-import AuthImage from "@/components/AuthImage";
-import ThirdPartyLogin from "@/components/ThirdPartyLogin";
-import Image from "next/image";
-import Link from "next/link";
-import logo from '@/assets/images/logo.png';
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 
-const LoginContent = () => {
+import React, { useState, Suspense } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Loader2, Mail, Lock, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import logo from '@/assets/images/logo.png';
+import Image from 'next/image';
+import Link from 'next/link';
+import ThirdPartyLogin from '@/components/ThirdPartyLogin';
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
 
-  const [user, setUser] = useState({
-    email: "",
-    password: "",
-  })
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [user, setUser] = useState({
+    email: '',
+    password: ''
+  });
 
-  const onLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
+      setError("");
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -38,84 +39,147 @@ const LoginContent = () => {
         router.push(redirect);
       } else {
         console.log("Login failed", data.error);
-        setError(data.error);
+        setError(data.error || "Login failed");
       }
-    } catch (error) {
-      console.log("Login failed", error.message);
+    } catch (err) {
+      console.log("Login failed", err.message);
       setError("Something went wrong");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  return <>
-    <div className="backdrop-blur-2xl bg-default-950/40 rounded-2xl overflow-hidden max-w-5xl mx-auto">
-      <div className="grid lg:grid-cols-2 gap-10">
-        <AuthImage />
-        <div className="flex flex-col h-full p-10 lg:ps-0">
-          <div className="pb-10">
-            <Link href="/" className="flex">
-              <Image src={logo} width={124} height={40} alt="dark logo" className="h-10" />
+  return (
+    <div className="fixed inset-0 z-50 bg-[#050505] overflow-hidden">
+      {/* Tech Background */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+      <div className="fixed top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#7080FF]/50 to-transparent" />
+      <div className="fixed bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#7080FF]/50 to-transparent" />
+
+      <div className="h-full w-full flex flex-col items-center justify-center py-8 px-4 relative">
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-[380px] relative z-10"
+        >
+          <div className="mb-4 flex justify-start">
+            <Link
+              href="/"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-slate-500 transition-all duration-300 hover:bg-[#7080FF] hover:text-white border border-white/10 hover:border-[#7080FF] shadow-lg"
+            >
+              <ArrowLeft className="w-4 h-4" />
             </Link>
           </div>
-          <div className="pb6 my-auto">
-            <h4 className="text-2xl font-bold text-white mb-4">Get Started Now</h4>
-            <p className="text-default-300 mb-8 max-w-sm ">Enter your email address and password to access account.</p>
+          <div className="relative group">
+            {/* Glowing Border Effect */}
+            <div className="absolute -inset-0.5 bg-gradient-to-b from-[#7080FF] to-purple-600 rounded-[2rem] opacity-20 group-hover:opacity-40 blur transition duration-500" />
 
-            {error && <div className="mb-4 text-red-500">{error}</div>}
-
-            <form onSubmit={onLogin} className="text-start">
-              <div className="mb-4">
-                <label htmlFor="emailaddress" className="block text-base/normal font-semibold text-default-200 mb-2">Email address</label>
-                <input
-                  className="block w-full rounded py-1.5 px-3 bg-transparent border-white/10 border-default-200 text-white/80 focus:border-white/25 focus:ring-transparent"
-                  type="email"
-                  id="emailaddress"
-                  required
-                  placeholder="Enter your email"
-                  value={user.email}
-                  onChange={(e) => setUser({ ...user, email: e.target.value })}
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="password" className="block text-base/normal font-semibold text-default-200 mb-2">Password</label>
-                <input
-                  className="block w-full rounded py-1.5 px-3 bg-transparent border-white/10 border-default-200 text-white/80 focus:border-white/25 focus:ring-transparent"
-                  type="password"
-                  required
-                  id="password"
-                  placeholder="Enter your password"
-                  value={user.password}
-                  onChange={(e) => setUser({ ...user, password: e.target.value })}
-                />
-              </div>
-              <div className="mb-6">
-                <div className="flex flex-wrap items-center justify-between gap-y-1">
-                  <div>
-                    <input type="checkbox" className="h-4 w-4 rounded text-primary border-white/20 bg-white/20 text-primary-600 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary/60 focus:ring-offset-0" id="checkbox-signin" />
-                    <label className="ms-2 text-default-200 align-middle" htmlFor="checkbox-signin">Remember me</label>
-                  </div>
-                  <Link href="/forgot-pw" className="text-default-200 border-b border-dashed"><small>Forgot your password?</small></Link>
+            <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-[2rem] shadow-2xl">
+              <div className="text-center mb-6">
+                <div className="w-36 mx-auto mb-16">
+                  <Image src={logo} alt="Zifto Logo" className="w-full h-10 object-contain" />
                 </div>
+                <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
+                  Welcome Back, Creator
+                </h1>
+                <p className="text-slate-400 text-sm">
+                  Authenticate to access your generated worlds
+                </p>
               </div>
-              <div className="mb-6 text-center">
-                <button className="w-full inline-flex items-center justify-center px-6 py-2 backdrop-blur-2xl bg-primary-600/90 text-white rounded-lg transition-all duration-500 group hover:bg-primary-600 mt-5" type="submit"><span className="fw-bold">{loading ? "Processing..." : "Sign In"}</span> </button>
+
+              {error && <div className="mb-4 text-red-500 text-center text-sm">{error}</div>}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email address</label>
+                  <div className="relative group/input">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-[#7080FF] transition-colors">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      value={user.email}
+                      onChange={(e) => setUser({ ...user, email: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-white placeholder:text-slate-600 focus:border-[#7080FF] focus:ring-1 focus:ring-[#7080FF] transition-all outline-none font-mono text-xs"
+                      placeholder="name@example.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">Password</label>
+                  <div className="relative group/input">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-[#7080FF] transition-colors">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      value={user.password}
+                      onChange={(e) => setUser({ ...user, password: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-white placeholder:text-slate-600 focus:border-[#7080FF] focus:ring-1 focus:ring-[#7080FF] transition-all outline-none font-mono text-xs"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-y-1 mt-4">
+                  <div className="flex items-center">
+                    <input type="checkbox" className="h-4 w-4 rounded border-white/20 bg-white/5 text-[#7080FF] shadow-sm focus:ring-[#7080FF]/60" id="checkbox-signin" />
+                    <label className="ml-2 text-sm text-slate-400 align-middle" htmlFor="checkbox-signin">Remember me</label>
+                  </div>
+                  <Link href="/forgot-pw" className="text-sm text-slate-400 hover:text-[#7080FF] transition-colors"><small>Forgot your password?</small></Link>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#7080FF] hover:bg-[#5e6ce6] text-white font-bold py-3 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(112,128,255,0.4)] flex items-center justify-center gap-2 mt-6 relative overflow-hidden group/btn text-sm"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:animate-shimmer" />
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      Authenticate
+                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </motion.button>
+              </form>
+
+              <div className="mt-6 pt-5 border-t border-white/5 text-center">
+                <p className="text-xs text-slate-400">
+                  New to Zifto?
+                  <Link
+                    href="/register"
+                    className="ml-2 text-[#7080FF] hover:text-[#8ba2ff] font-medium transition-colors hover:underline decoration-[#7080FF]/30 underline-offset-4"
+                  >
+                    Initialize account
+                  </Link>
+                </p>
               </div>
-            </form>
+
+              <div className="mt-5 flex justify-center gap-4 text-[9px] text-slate-600 font-mono uppercase tracking-wider">
+                <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Encrypted</span>
+                <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Fast Access</span>
+              </div>
+            </div>
           </div>
-          <ThirdPartyLogin />
-        </div>
+        </motion.div>
       </div>
     </div>
-    <div className="w-full text-center mt-5">
-      <p className="text-default-300 leading-6 text-base font-medium">Don&apos;t have an account? <Link href="/register" className="text-primary font-semibold ms-1">Sign Up</Link></p>
-    </div>
-  </>;
-};
+  );
+}
 
 const Login = () => {
   return (
-    <Suspense>
+    <Suspense fallback={<div>Loading...</div>}>
       <LoginContent />
     </Suspense>
   );

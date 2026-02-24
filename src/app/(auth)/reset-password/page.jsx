@@ -1,12 +1,12 @@
-
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import AuthImage from "@/components/AuthImage";
+import { motion } from 'framer-motion';
+import { ArrowLeft, Loader2, Mail, ShieldCheck, Zap, KeyRound, Lock, ArrowRight } from 'lucide-react';
 import logo from '@/assets/images/logo.png';
-import { Suspense } from 'react'
 
 const ResetPasswordContent = () => {
     const router = useRouter();
@@ -24,6 +24,7 @@ const ResetPasswordContent = () => {
         e.preventDefault();
         try {
             setLoading(true);
+            setError(false);
             const response = await fetch("/api/auth/reset-password", {
                 method: "POST",
                 headers: {
@@ -58,84 +59,140 @@ const ResetPasswordContent = () => {
 
 
     return (
-        <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl bg-default-950/40 backdrop-blur-2xl">
-            <div className="grid gap-10 lg:grid-cols-2">
-                <AuthImage />
-                <div className="flex h-full flex-col p-10 lg:ps-0">
-                    <div className="pb-10">
-                        <Link href="/" className="flex">
-                            <Image src={logo} width={124} height={40} alt="dark logo" className="h-10" />
+        <div className="fixed inset-0 z-50 bg-[#050505] overflow-hidden">
+            {/* Tech Background */}
+            <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+            <div className="fixed top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#7080FF]/50 to-transparent" />
+            <div className="fixed bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#7080FF]/50 to-transparent" />
+
+            <div className="h-full w-full flex flex-col items-center justify-center py-8 px-4 relative">
+
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full max-w-[380px] relative z-10"
+                >
+                    <div className="mb-4 flex justify-start">
+                        <Link
+                            href="/login"
+                            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-slate-500 transition-all duration-300 hover:bg-[#7080FF] hover:text-white border border-white/10 hover:border-[#7080FF] shadow-lg"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
                         </Link>
                     </div>
-                    <div className="pb6 my-auto">
-                        <h4 className="mb-4 text-2xl font-bold text-white">Reset Password</h4>
-                        <p className="mb-8 max-w-sm text-default-300">
-                            Enter your OTP code and new password.
-                        </p>
+                    <div className="relative group">
+                        {/* Glowing Border Effect */}
+                        <div className="absolute -inset-0.5 bg-gradient-to-b from-[#7080FF] to-purple-600 rounded-[2rem] opacity-20 group-hover:opacity-40 blur transition duration-500" />
 
-                        <form onSubmit={resetUserPassword} className="text-start">
-                            {!emailParam && (
-                                <div className="mb-4">
-                                    <label htmlFor="email" className="mb-2 block text-base/normal font-semibold text-default-200">Email</label>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent"
-                                        placeholder="Enter your email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                    />
+                        <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-[2rem] shadow-2xl">
+                            <div className="text-center mb-6">
+                                <div className="w-36 mx-auto mb-16">
+                                    <Image src={logo} alt="Zifto Logo" className="w-full h-10 object-contain" />
                                 </div>
-                            )}
-
-                            <div className="mb-4">
-                                <label htmlFor="otp" className="mb-2 block text-base/normal font-semibold text-default-200">OTP Code</label>
-                                <input
-                                    type="text"
-                                    id="otp"
-                                    className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent"
-                                    placeholder="Enter 6-digit OTP"
-                                    value={token}
-                                    onChange={(e) => setToken(e.target.value)}
-                                />
+                                <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
+                                    Reset Password
+                                </h1>
+                                <p className="text-slate-400 text-sm">
+                                    Enter your OTP code and new password.
+                                </p>
                             </div>
 
-                            <div className="mb-4">
-                                <label htmlFor="password" className="mb-2 block text-base/normal font-semibold text-default-200">New Password</label>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent"
-                                    placeholder="Enter new password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                            </div>
+                            {verified && <div className="mb-4 text-emerald-400 text-center text-sm font-medium p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">Password changed! Redirecting...</div>}
+                            {error && <div className="mb-4 text-red-500 text-center text-sm font-medium p-2 bg-red-500/10 rounded-lg border border-red-500/20">Failed. Check OTP or Email.</div>}
 
-                            {verified && (
-                                <div className="mb-4 p-2 bg-green-500/20 text-green-500 rounded text-center">
-                                    Password changed successfully! Redirecting to login...
+                            <form onSubmit={resetUserPassword} className="space-y-4">
+                                {!emailParam && (
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email</label>
+                                        <div className="relative group/input">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-[#7080FF] transition-colors">
+                                                <Mail className="w-4 h-4" />
+                                            </div>
+                                            <input
+                                                type="email"
+                                                required
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-white placeholder:text-slate-600 focus:border-[#7080FF] focus:ring-1 focus:ring-[#7080FF] transition-all outline-none font-mono text-xs"
+                                                placeholder="Enter your email"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">OTP Code</label>
+                                    <div className="relative group/input">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-[#7080FF] transition-colors">
+                                            <KeyRound className="w-4 h-4" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={token}
+                                            onChange={(e) => setToken(e.target.value)}
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-white placeholder:text-slate-600 focus:border-[#7080FF] focus:ring-1 focus:ring-[#7080FF] transition-all outline-none font-mono text-xs tracking-widest"
+                                            placeholder="••••••"
+                                        />
+                                    </div>
                                 </div>
-                            )}
 
-                            {error && (
-                                <div className="mb-4 p-2 bg-red-500/20 text-red-500 rounded text-center">
-                                    Failed. Check OTP or Email.
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">New Password</label>
+                                    <div className="relative group/input">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-[#7080FF] transition-colors">
+                                            <Lock className="w-4 h-4" />
+                                        </div>
+                                        <input
+                                            type="password"
+                                            required
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-white placeholder:text-slate-600 focus:border-[#7080FF] focus:ring-1 focus:ring-[#7080FF] transition-all outline-none font-mono text-xs tracking-widest"
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
                                 </div>
-                            )}
 
-                            <div className="mb-6 text-center">
-                                <button
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                     type="submit"
-                                    disabled={verified || loading}
-                                    className="bg-primary-600/90 hover:bg-primary-600 group mt-5 inline-flex w-full items-center justify-center rounded-lg px-6 py-2 text-white backdrop-blur-2xl transition-all duration-500"
+                                    disabled={loading || verified}
+                                    className="w-full bg-[#7080FF] hover:bg-[#5e6ce6] text-white font-bold py-3 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(112,128,255,0.4)] flex items-center justify-center gap-2 mt-6 relative overflow-hidden group/btn text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <span className="fw-bold">{loading ? "Processing..." : "Reset Password"}</span>
-                                </button>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:animate-shimmer" />
+                                    {loading ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <>
+                                            Reset Password
+                                            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                        </>
+                                    )}
+                                </motion.button>
+                            </form>
+
+                            <div className="mt-6 pt-5 border-t border-white/5 text-center">
+                                <p className="text-xs text-slate-400">
+                                    Back To
+                                    <Link
+                                        href="/login"
+                                        className="ml-2 text-[#7080FF] hover:text-[#8ba2ff] font-medium transition-colors hover:underline decoration-[#7080FF]/30 underline-offset-4"
+                                    >
+                                        Log In
+                                    </Link>
+                                </p>
                             </div>
-                        </form>
+
+                            <div className="mt-5 flex justify-center gap-4 text-[9px] text-slate-600 font-mono uppercase tracking-wider">
+                                <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Encrypted</span>
+                                <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Fast Access</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     );
@@ -143,7 +200,7 @@ const ResetPasswordContent = () => {
 
 export default function ResetPasswordPage() {
     return (
-        <Suspense>
+        <Suspense fallback={<div>Loading...</div>}>
             <ResetPasswordContent />
         </Suspense>
     )

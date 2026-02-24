@@ -1,19 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import Gumshoe from 'gumshoejs';
-import IconifyIcon from "./wrappers/IconifyIcon";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from 'framer-motion';
+import { Coins, Plus, LogOut, Menu } from 'lucide-react';
 import logo from '@/assets/images/logo.png';
-import useScrollEvent from "@/hooks/useScrollEvent";
-const TopNavbar = ({
-  navLinks = []
-}) => {
-  const navRef = useRef(null);
-  const {
-    scrollY
-  } = useScrollEvent();
+import { useRouter } from "next/navigation";
+
+const TopNavbar = ({ navLinks = [] }) => {
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userCredits, setUserCredits] = useState(0);
@@ -33,21 +29,7 @@ const TopNavbar = ({
 
   useEffect(() => {
     checkAuth();
-    document.body.classList.add('bg-default-900');
-    try {
-      if (navRef.current && typeof window !== 'undefined' && window.location.pathname === '/') {
-        const navLinks = document.querySelectorAll('.navbar-nav a');
-        if (navLinks.length > 0) {
-          new Gumshoe('.navbar-nav a', {
-            offset: 80
-          });
-        }
-      }
-    } catch (error) {
-      console.log('Gumshoe initialization skipped:', error.message);
-    }
-
-    // Listen for credits-updated event (fired from any page when credits change)
+    // Listen for credits-updated event
     const handleCreditsUpdate = (e) => {
       if (e.detail?.credits !== undefined) {
         setUserCredits(e.detail.credits);
@@ -58,7 +40,6 @@ const TopNavbar = ({
     window.addEventListener('credits-updated', handleCreditsUpdate);
 
     return () => {
-      document.body.classList.remove('bg-default-900');
       window.removeEventListener('credits-updated', handleCreditsUpdate);
     };
   }, [refreshCredits]);
@@ -88,72 +69,83 @@ const TopNavbar = ({
     }
   };
 
-  return <>
-    <header id="navbar-sticky" className={`navbar ${scrollY >= 50 && 'nav-sticky'}`}>
-      <div className="container">
-        <nav>
-          <Link href="/" className="logo">
-            <Image src={logo} height={40} width={124} className="h-10" alt="WebAi Logo" />
-          </Link>
-          <div className="lg:hidden flex items-center ms-auto px-2.5">
-            <button className="hs-collapse-toggle inline-flex items-center justify-center h-9 w-12 rounded-md border border-white/20 bg-default-100/5" type="button" id="hs-unstyled-collapse" data-hs-collapse="#mobileMenu" data-hs-type="collapse">
-              <IconifyIcon icon="lucide:menu" className="h-5 w-5 stroke-white" />
-            </button>
-          </div>
-          <div ref={navRef} id="mobileMenu" className="hs-collapse transition-all duration-300 lg:basis-auto basis-full grow hidden lg:flex items-center justify-center mx-auto mt-2 lg:mt-0">
-            <ul id="navbar-navlist" className="navbar-nav">
-              {navLinks.map((item, idx) => <li key={item.link + idx} className="nav-item">
-                <a href={item.link} className="nav-link">
-                  {item.label}
-                </a>
-              </li>)}
-            </ul>
-            <div className="lg:hidden flex items-center pt-4 mt-4 lg:pt-0 lg:mt-0 border-t border-white/10 lg:border-none">
-              {!loading && (
-                isAuthenticated ? (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2 px-6 py-2 bg-white/5 rounded-full border border-white/10">
-                      <IconifyIcon icon="lucide:coins" className="text-yellow-400 w-5 h-5" />
-                      <span className="text-white font-medium">{userCredits} Credits</span>
-                      <Link href="/buy-credits" className="text-xs text-primary hover:text-primary-hover underline ml-2">Buy</Link>
-                    </div>
-                    <button onClick={handleLogout} className="inline-flex items-center justify-center gap-2 bg-red-500/10 text-red-500 py-2 px-6 rounded-full hover:bg-red-500 hover:text-white transition-all duration-3">
-                      <IconifyIcon icon="lucide:log-out" className="h-5 w-5 me-2" /> Logout
-                    </button>
-                  </div>
-                ) : (
-                  <Link href="/login" className="inline-flex items-center justify-center gap-2 bg-primary text-white py-2 px-6 rounded-full hover:bg-primary-hover transition-all duration-3">
-                    <IconifyIcon icon="lucide:log-in" className="h-5 w-5 me-2" /> Login
+  return (
+    <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-md border-b border-white/5">
+      <div className="max-w-7xl mx-auto px-6 h-28 flex items-center justify-between">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => router.push('/')}
+        >
+          <Image src={logo} alt="Zifto Logo" className="h-10 object-contain" />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400"
+        >
+          {isAuthenticated ? (
+            <>
+              <Link href="/create-storybook" className="hover:text-white transition-colors w-max">Create Storybook</Link>
+              <Link href="/my-storybooks" className="hover:text-white transition-colors w-max">My Storybooks</Link>
+              <Link href="/buy-credits" className="hover:text-white transition-colors w-max">Buy Credits</Link>
+            </>
+          ) : (
+            <>
+              <Link href="/#features" className="hover:text-white transition-colors w-max">Features</Link>
+              <Link href="/#how-it-works" className="hover:text-white transition-colors w-max">How it Works</Link>
+              <Link href="/#pricing" className="hover:text-white transition-colors w-max">Pricing</Link>
+            </>
+          )}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-4"
+        >
+          {!loading && (
+            isAuthenticated ? (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/10 hover:border-[#7080FF]/50 transition-colors">
+                  <Coins className="text-yellow-400 w-4 h-4" />
+                  <span className="text-white text-sm font-medium">{userCredits}</span>
+                  <Link href="/buy-credits" className="w-5 h-5 flex items-center justify-center rounded-full bg-[#7080FF]/20 text-[#7080FF] hover:bg-[#7080FF] hover:text-white transition-all">
+                    <Plus className="w-3 h-3" />
                   </Link>
-                )
-              )}
-            </div>
-          </div>
-          <div className="hidden lg:flex items-center">
-            {!loading && (
-              isAuthenticated ? (
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/10 hover:border-primary/50 transition-colors">
-                    <IconifyIcon icon="lucide:coins" className="text-yellow-400 w-4 h-4" />
-                    <span className="text-white text-sm font-medium">{userCredits}</span>
-                    <Link href="/buy-credits" className="w-5 h-5 flex items-center justify-center rounded-full bg-primary/20 text-primary hover:bg-primary hover:text-white transition-all">
-                      <IconifyIcon icon="lucide:plus" className="w-3 h-3" />
-                    </Link>
-                  </div>
-                  <button onClick={handleLogout} className="inline-flex items-center justify-center gap-2 bg-red-500/10 text-red-500 py-2 px-6 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300">
-                    <IconifyIcon icon="lucide:log-out" className="h-5 w-5 me-2" /> Logout
-                  </button>
                 </div>
-              ) : (
-                <Link href="/login" className="inline-flex items-center justify-center gap-2 bg-primary text-white py-2 px-6 rounded-full hover:bg-primary-hover transition-all duration-300">
-                  <IconifyIcon icon="lucide:log-in" className="h-5 w-5 me-2" /> Login
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex items-center justify-center gap-2 bg-red-500/10 text-red-500 py-1.5 px-4 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 text-sm font-semibold"
+                >
+                  <LogOut className="h-4 w-4" /> Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors relative group"
+                >
+                  <span>Log In</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#7080FF] transition-all group-hover:w-full" />
                 </Link>
-              )
-            )}
-          </div>
-        </nav>
+                <Link
+                  href="/register"
+                  className="group relative px-6 py-2.5 text-sm font-bold bg-white text-black rounded-full overflow-hidden transition-transform hover:scale-105"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
+                  <span className="relative z-10">Get Started</span>
+                </Link>
+              </>
+            )
+          )}
+        </motion.div>
       </div>
-    </header>
-  </>;
+    </nav>
+  );
 };
+
 export default TopNavbar;

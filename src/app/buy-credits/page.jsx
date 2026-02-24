@@ -231,7 +231,7 @@ const BuyCreditsPage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-900">
+            <div className="min-h-screen flex items-center justify-center bg-[#050505]">
                 <div className="text-white text-xl">Loading...</div>
             </div>
         );

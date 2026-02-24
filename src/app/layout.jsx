@@ -23,7 +23,7 @@ const splashScreenStyles = `
   position: fixed;
   top: 50%;
   left: 50%;
-  background: #491c53;
+  background: #050505;
   display: flex;
   height: 100%;
   width: 100%;
@@ -52,21 +52,21 @@ export default function RootLayout({
   children
 }) {
   return <html lang="en">
-       <head>
-        <style suppressHydrationWarning>{splashScreenStyles}</style>
-      </head>
-      <body className={`${jostSans.className}`}>
-        <div id="splash-screen">
-          <Image alt="logo-text" src={logo} style={{
+    <head>
+      <style suppressHydrationWarning>{splashScreenStyles}</style>
+    </head>
+    <body className={`${jostSans.className}`}>
+      <div id="splash-screen">
+        <Image alt="logo-text" src={logo} style={{
           height: '10%',
           width: 'auto'
         }} priority />
-        </div>
-        <div id="__next_splash">
-          <AppProviders>
-            {children}
-          </AppProviders>
-        </div>
-      </body>
-    </html>;
+      </div>
+      <div id="__next_splash">
+        <AppProviders>
+          {children}
+        </AppProviders>
+      </div>
+    </body>
+  </html>;
 }

@@ -1,25 +1,25 @@
-
 "use client";
-import AuthImage from "@/components/AuthImage";
-import Link from "next/link";
-import ThirdPartyLogin from "@/components/ThirdPartyLogin";
-import Image from "next/image";
-import logo from '@/assets/images/logo.png';
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
-const Register = () => {
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Loader2, Mail, Lock, User, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import logo from '@/assets/images/logo.png';
+import Image from 'next/image';
+import Link from 'next/link';
+import ThirdPartyLogin from '@/components/ThirdPartyLogin';
+
+export default function Register() {
   const router = useRouter();
-  const [user, setUser] = useState({
-    username: "",
-    email: "",
-    password: "",
-  })
-  const [buttonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [user, setUser] = useState({
+    username: '',
+    email: '',
+    password: ''
+  });
+  const [buttonDisabled, setButtonDisabled] = useState(true);
 
-  // Disable button if any field is empty
   useEffect(() => {
     if (user.username.length > 0 && user.email.length > 0 && user.password.length > 0) {
       setButtonDisabled(false);
@@ -28,7 +28,7 @@ const Register = () => {
     }
   }, [user]);
 
-  const onSignup = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
@@ -49,102 +49,151 @@ const Register = () => {
         console.log("Signup failed", data.error);
         setError(data.error);
       }
-
-    } catch (error) {
-      console.log("Signup failed", error.message);
+    } catch (err) {
+      console.log("Signup failed", err.message);
       setError("Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  return <>
-    <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl bg-default-950/40 backdrop-blur-2xl">
+  return (
+    <div className="fixed inset-0 z-50 bg-[#050505] overflow-hidden">
+      {/* Tech Background */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+      <div className="fixed top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#7080FF]/50 to-transparent" />
+      <div className="fixed bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#7080FF]/50 to-transparent" />
 
-      <div className="grid gap-10 lg:grid-cols-2">
-        <AuthImage />
-        <div className="flex h-full flex-col p-10 lg:ps-0">
-          <div className="pb-10">
-            <Link href="/" className="flex">
-              <Image src={logo} width={124} height={40} alt="dark logo" className="h-10" />
+      <div className="h-full w-full flex flex-col items-center justify-center py-8 px-4 relative">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-[380px] relative z-10"
+        >
+          <div className="mb-4 flex justify-start">
+            <Link
+              href="/"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-slate-500 transition-all duration-300 hover:bg-[#7080FF] hover:text-white border border-white/10 hover:border-[#7080FF] shadow-lg"
+            >
+              <ArrowLeft className="w-4 h-4" />
             </Link>
           </div>
-          <div className="pb6 my-auto">
-            <h4 className="mb-4 text-2xl font-bold text-white">Get Started Now</h4>
-            <p className="mb-8 max-w-sm text-default-300">
-              Enter your email address and password to access account.
-            </p>
+          <div className="relative group">
+            {/* Glowing Border Effect */}
+            <div className="absolute -inset-0.5 bg-gradient-to-b from-[#7080FF] to-purple-600 rounded-[2rem] opacity-20 group-hover:opacity-40 blur transition duration-500" />
 
-            {error && (
-              <div className="mb-4 p-2 bg-red-500/20 text-red-500 rounded text-center">
-                {error}
+            <div className="relative bg-zinc-900/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-[2rem] shadow-2xl">
+              <div className="text-center mb-6">
+                <div className="w-36 mx-auto mb-16">
+                  <Image src={logo} alt="Zifto Logo" className="w-full h-10 object-contain" />
+                </div>
+                <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
+                  Initialize Studio
+                </h1>
+                <p className="text-slate-400 text-sm">
+                  Begin your journey into AI storytelling
+                </p>
               </div>
-            )}
 
-            <form onSubmit={onSignup} className="text-start">
-              <div className="mb-4">
-                <label htmlFor="input-label" className="mb-2 block text-base/normal font-semibold text-default-200">Your Name</label>
-                <input
-                  type="text"
-                  id="input-label"
-                  className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent"
-                  placeholder="Your Name"
-                  value={user.username}
-                  onChange={(e) => setUser({ ...user, username: e.target.value })}
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="emailaddress" className="mb-2 block text-base/normal font-semibold text-default-200">Email address</label>
-                <input
-                  className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent"
-                  type="email"
-                  id="emailaddress"
-                  required
-                  placeholder="Enter your email"
-                  value={user.email}
-                  onChange={(e) => setUser({ ...user, email: e.target.value })}
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="password" className="mb-2 block text-base/normal font-semibold text-default-200">Password</label>
-                <input
-                  className="block w-full rounded border-default-200 border-white/10 bg-transparent px-3 py-1.5 text-white/80 focus:border-white/25 focus:ring-transparent"
-                  type="password"
-                  required
-                  id="password"
-                  placeholder="Enter your password"
-                  value={user.password}
-                  onChange={(e) => setUser({ ...user, password: e.target.value })}
-                />
-              </div>
-              <div className="mb-6">
-                <input type="checkbox" className="text-primary-600 focus:border-primary-300 h-4 w-4 rounded border-white/20 bg-white/20 text-primary shadow-sm focus:ring focus:ring-primary/60 focus:ring-offset-0" id="checkbox-signin" />
-                <label className="ms-2 align-middle text-default-200" htmlFor="checkbox-signin">Remember me</label>
-              </div>
-              <div className="mb-6 text-center">
-                {/* hidden span — satisfies linter, buttonDisabled is genuinely used below */}
-                <span style={{ display: 'none' }}>{buttonDisabled ? 'disabled' : 'enabled'}</span>
-                <button
-                  disabled={buttonDisabled || loading}
-                  className="bg-primary-600/90 hover:bg-primary-600 group mt-5 inline-flex w-full items-center justify-center rounded-lg px-6 py-2 text-white backdrop-blur-2xl transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              {error && <div className="mb-4 text-red-500 text-center text-sm">{error}</div>}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">Your Name</label>
+                  <div className="relative group/input">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-[#7080FF] transition-colors">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={user.username}
+                      onChange={(e) => setUser({ ...user, username: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-white placeholder:text-slate-600 focus:border-[#7080FF] focus:ring-1 focus:ring-[#7080FF] transition-all outline-none font-mono text-xs"
+                      placeholder="Your Name"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">Email address</label>
+                  <div className="relative group/input">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-[#7080FF] transition-colors">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      value={user.email}
+                      onChange={(e) => setUser({ ...user, email: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-white placeholder:text-slate-600 focus:border-[#7080FF] focus:ring-1 focus:ring-[#7080FF] transition-all outline-none font-mono text-xs"
+                      placeholder="name@example.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">Password</label>
+                  <div className="relative group/input">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-[#7080FF] transition-colors">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      value={user.password}
+                      onChange={(e) => setUser({ ...user, password: e.target.value })}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl py-2.5 pl-9 pr-4 text-white placeholder:text-slate-600 focus:border-[#7080FF] focus:ring-1 focus:ring-[#7080FF] transition-all outline-none font-mono text-xs"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center mt-4 mb-2">
+                  <input type="checkbox" className="h-4 w-4 rounded text-[#7080FF] border-white/20 bg-white/5 shadow-sm focus:ring-[#7080FF]/60" id="checkbox-signup" />
+                  <label className="ml-2 text-sm text-slate-400 align-middle" htmlFor="checkbox-signup">Remember me</label>
+                </div>
+
+                <motion.button
+                  whileHover={!buttonDisabled ? { scale: 1.02 } : {}}
+                  whileTap={!buttonDisabled ? { scale: 0.98 } : {}}
                   type="submit"
+                  disabled={buttonDisabled || loading}
+                  className="w-full bg-[#7080FF] hover:bg-[#5e6ce6] text-white font-bold py-3 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(112,128,255,0.4)] flex items-center justify-center gap-2 mt-6 relative overflow-hidden group/btn disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
-                  <span className="fw-bold">{loading ? "Processing" : "Sign Up"}</span>
-                </button>
+                  {!buttonDisabled && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:animate-shimmer" />}
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      Create Account
+                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </motion.button>
+              </form>
+
+              <div className="mt-6 pt-5 border-t border-white/5 text-center">
+                <p className="text-xs text-slate-400">
+                  Already verified?
+                  <Link
+                    href="/login"
+                    className="ml-2 text-[#7080FF] hover:text-[#8ba2ff] font-medium transition-colors hover:underline decoration-[#7080FF]/30 underline-offset-4"
+                  >
+                    Log in
+                  </Link>
+                </p>
               </div>
-            </form>
+              <div className="mt-5 flex justify-center gap-4 text-[9px] text-slate-600 font-mono uppercase tracking-wider">
+                <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Encrypted</span>
+                <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Fast Access</span>
+              </div>
+            </div>
           </div>
-          <ThirdPartyLogin />
-        </div>
+        </motion.div>
       </div>
     </div>
-    <div className="mt-5 w-full text-center">
-      <p className="text-base font-medium leading-6 text-default-300">
-        Already have an account?
-        <Link href="/login" className="ms-1 font-semibold text-primary">Sign In</Link>
-      </p>
-    </div>
-
-  </>;
-};
-export default Register;
+  );
+}

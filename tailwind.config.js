@@ -19,8 +19,8 @@ const config = {
     },
     extend: {
       colors: {
-        primary: colors.violet["600"],
-        "primary-hover": colors.violet["700"],
+        primary: "#7080FF",
+        "primary-hover": "#5e6ce6",
         default: colors.slate
       }
     }
