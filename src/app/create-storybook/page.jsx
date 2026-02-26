@@ -9,8 +9,6 @@ import { navLinks } from "../(home)/data";
 import IconifyIcon from "@/components/wrappers/IconifyIcon";
 import { cn } from "@/helpers/cn";
 
-const STORYBOOK_CREDIT_COST = 2;
-
 const CreateStorybookPage = () => {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
@@ -26,8 +24,10 @@ const CreateStorybookPage = () => {
         character_name: "",
         age: "",
         gender: "boy",
-        pages: 4
+        pages: ""
     });
+
+    const creditCost = Number(formData.pages) || 0;
 
     const checkAuth = useCallback(async () => {
         try {
@@ -74,13 +74,13 @@ const CreateStorybookPage = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: name === 'pages' ? parseInt(value) : value }));
+        setFormData(prev => ({ ...prev, [name]: name === 'pages' ? (value === '' ? '' : parseInt(value)) : value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (userCredits < STORYBOOK_CREDIT_COST) {
+        if (userCredits < creditCost) {
             // Show credit warning handled by render
             return;
         }
@@ -133,7 +133,7 @@ const CreateStorybookPage = () => {
                 window.dispatchEvent(new CustomEvent('credits-updated', { detail: { credits: newCredits } }));
             } else {
                 // Fallback: deduct locally
-                setUserCredits(prev => prev - STORYBOOK_CREDIT_COST);
+                setUserCredits(prev => prev - creditCost);
                 window.dispatchEvent(new CustomEvent('credits-updated'));
             }
 
@@ -146,7 +146,9 @@ const CreateStorybookPage = () => {
                 recentSection.scrollIntoView({ behavior: 'smooth' });
             }
 
-            // Reset form slightly? Maybe keep it for next one.
+            // Reset pages to empty to prevent accidental double-spend
+            setFormData(prev => ({ ...prev, pages: "" }));
+
             alert("Storybook created successfully! Check it out below.");
 
         } catch (error) {
@@ -171,7 +173,7 @@ const CreateStorybookPage = () => {
             <TopNavbar navLinks={navLinks} />
 
             {/* Credit Warning Modal */}
-            {userCredits < STORYBOOK_CREDIT_COST && (
+            {userCredits < creditCost && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="bg-slate-900 border border-white/10 rounded-2xl p-8 max-w-md w-full text-center relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
@@ -180,7 +182,7 @@ const CreateStorybookPage = () => {
                         </div>
                         <h3 className="text-2xl font-bold text-white mb-2">Insufficient Credits</h3>
                         <p className="text-default-300 mb-6">
-                            You need <span className="text-white font-bold">{STORYBOOK_CREDIT_COST} credits</span> to generate a storybook.
+                            You need <span className="text-white font-bold">{creditCost} credits</span> to generate a {formData.pages}-page storybook.
                             Your current balance is <span className="text-red-400 font-bold">{userCredits} credits</span>.
                         </p>
                         <button
@@ -205,7 +207,7 @@ const CreateStorybookPage = () => {
                             </p>
                             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
                                 <IconifyIcon icon="lucide:coins" className="text-yellow-400" />
-                                <span className="text-sm text-default-200">Cost: 2 Credits</span>
+                                <span className="text-sm text-default-200">Cost: {creditCost} Credits</span>
                             </div>
                         </div>
 
@@ -304,20 +306,18 @@ const CreateStorybookPage = () => {
                                     {/* Pages */}
                                     <div>
                                         <label className="block text-sm font-medium text-default-300 mb-2">
-                                            Pages
+                                            Pages (1 Page = 1 Credit)
                                         </label>
-                                        <select
+                                        <input
+                                            type="number"
                                             name="pages"
                                             value={formData.pages}
                                             onChange={handleInputChange}
-                                            className="w-full bg-slate-900 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                                        >
-                                            <option value="4">4 Pages</option>
-                                            <option value="8">8 Pages</option>
-                                            <option value="12">12 Pages</option>
-                                            <option value="16">16 Pages</option>
-                                            <option value="20">20 Pages</option>
-                                        </select>
+                                            min="1"
+                                            required
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                            placeholder="e.g. 10"
+                                        />
                                     </div>
                                 </div>
 
@@ -340,7 +340,7 @@ const CreateStorybookPage = () => {
                                 {/* Submit Button */}
                                 <button
                                     type="submit"
-                                    disabled={userCredits < STORYBOOK_CREDIT_COST || generating}
+                                    disabled={userCredits < creditCost || generating || formData.pages < 1}
                                     className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary-hover hover:to-purple-500 text-white font-bold text-lg shadow-lg shadow-primary/20 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                                 >
                                     {generating ? (

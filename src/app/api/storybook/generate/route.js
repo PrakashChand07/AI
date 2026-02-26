@@ -6,8 +6,6 @@ import { NextResponse } from "next/server";
 
 connect();
 
-const STORYBOOK_CREDIT_COST = 2;
-
 export async function POST(request) {
     try {
         const userId = getDataFromToken(request);
@@ -25,16 +23,23 @@ export async function POST(request) {
             uploaded_image_url
         } = reqBody;
 
+        const numPages = Number(pages);
+        if (!numPages || numPages < 1) {
+            return NextResponse.json({ error: "Invalid number of pages" }, { status: 400 });
+        }
+
+        const creditCost = numPages; // 1 credit per page
+
         // 1. Check User Credits
         const user = await User.findById(userId);
         if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        if (user.credits < STORYBOOK_CREDIT_COST) {
+        if (user.credits < creditCost) {
             return NextResponse.json({
                 error: "Insufficient credits",
-                required: STORYBOOK_CREDIT_COST,
+                required: creditCost,
                 current: user.credits
             }, { status: 402 }); // 402 Payment Required
         }
@@ -46,7 +51,7 @@ export async function POST(request) {
             characterName: character_name,
             age,
             gender,
-            pages,
+            pages: numPages,
             status: "processing",
         });
         await newStorybook.save();
@@ -68,7 +73,7 @@ export async function POST(request) {
                     character_name,
                     age,
                     gender,
-                    pages: Number(pages),
+                    pages: numPages,
                     branding: {
                         watermark: "CREATED BY ZIFTO"
                     }
@@ -91,13 +96,13 @@ export async function POST(request) {
             newStorybook.coverImageUrl = ziftoData.cover_image_url || "";
             newStorybook.title = ziftoData.story?.title || "My Adventure";
             newStorybook.status = "completed";
-            newStorybook.creditsUsed = STORYBOOK_CREDIT_COST;
+            newStorybook.creditsUsed = creditCost;
             await newStorybook.save();
 
             // 5. Deduct Credits (atomic operation - guaranteed to work)
             const updatedUser = await User.findByIdAndUpdate(
                 userId,
-                { $inc: { credits: -STORYBOOK_CREDIT_COST } },
+                { $inc: { credits: -creditCost } },
                 { new: true }
             );
 

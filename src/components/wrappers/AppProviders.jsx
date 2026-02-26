@@ -4,10 +4,12 @@ import { Fragment, useEffect } from "react";
 import Aos from 'aos';
 import { usePathname } from "next/navigation";
 import BackToTop from "../BackToTop";
-const AppProviders = ({
-  children
-}) => {
+import { SessionProvider } from "next-auth/react";
+import GoogleAuthSync from "../GoogleAuthSync";
+
+const AppProviders = ({ children }) => {
   const pathname = usePathname();
+
   useEffect(() => {
     Aos.init();
     import('preline/preline');
@@ -31,14 +33,22 @@ const AppProviders = ({
     }
     return () => observer.disconnect();
   }, []);
+
   useEffect(() => {
     setTimeout(() => {
       if (window.HSStaticMethods) window.HSStaticMethods.autoInit();
     }, 400);
   }, [pathname]);
-  return <Fragment>
-      {children}
-      <BackToTop />
-    </Fragment>;
+
+  return (
+    <SessionProvider>
+      <GoogleAuthSync />
+      <Fragment>
+        {children}
+        <BackToTop />
+      </Fragment>
+    </SessionProvider>
+  );
 };
+
 export default AppProviders;

@@ -12,7 +12,11 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, "Please provide a password"],
+        // Not required — Google OAuth users won't have a password
+    },
+    googleId: {
+        type: String,
+        default: null,
     },
     isVerified: {
         type: Boolean,

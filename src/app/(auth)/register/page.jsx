@@ -174,6 +174,7 @@ export default function Register() {
                   )}
                 </motion.button>
               </form>
+              <ThirdPartyLogin />
 
               <div className="mt-6 pt-5 border-t border-white/5 text-center">
                 <p className="text-xs text-slate-400">
