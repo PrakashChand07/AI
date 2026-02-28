@@ -25,7 +25,7 @@ const TopNavbar = ({ navLinks = [] }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 -ml-2 text-slate-300 hover:text-white transition-colors"
+            className="xl:hidden p-2 -ml-2 text-slate-300 hover:text-white transition-colors"
           >
             {isMobileMenuOpen ? <Plus className="w-6 h-6 rotate-45" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -44,7 +44,7 @@ const TopNavbar = ({ navLinks = [] }) => {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-medium text-slate-400"
+          className="hidden xl:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-medium text-slate-400"
         >
           {!loading && (
             isAuthenticated ? (
@@ -67,7 +67,7 @@ const TopNavbar = ({ navLinks = [] }) => {
         <div className="flex items-center gap-4">
           {/* Mobile Credits */}
           {!loading && isAuthenticated && (
-            <Link href="/buy-credits" className="md:hidden flex items-center gap-1.5 px-3 py-1.5 bg-[#7080FF]/10 rounded-full border border-[#7080FF]/30 text-[#7080FF] hover:bg-[#7080FF]/25 shadow-[0_0_15px_-5px_rgba(112,128,255,0.3)] transition-all">
+            <Link href="/buy-credits" className="xl:hidden flex items-center gap-1.5 px-3 py-1.5 bg-[#7080FF]/10 rounded-full border border-[#7080FF]/30 text-[#7080FF] hover:bg-[#7080FF]/25 shadow-[0_0_15px_-5px_rgba(112,128,255,0.3)] transition-all">
               <Coins className="w-3.5 h-3.5" />
               <span className="text-xs font-bold">{user?.credits || 0}</span>
             </Link>
@@ -77,7 +77,7 @@ const TopNavbar = ({ navLinks = [] }) => {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="hidden md:flex items-center gap-4"
+            className="hidden xl:flex items-center gap-4"
           >
             {!loading && (
               isAuthenticated ? (
@@ -127,7 +127,7 @@ const TopNavbar = ({ navLinks = [] }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden absolute top-[100%] left-4 right-4 mt-2 bg-zinc-950/95 backdrop-blur-3xl border border-white/10 rounded-3xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(112,128,255,0.2)] z-50 p-2"
+            className="xl:hidden absolute top-[100%] left-4 right-4 mt-2 bg-zinc-950/95 backdrop-blur-3xl border border-white/10 rounded-3xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(112,128,255,0.2)] z-50 p-2"
           >
             <div className="flex flex-col gap-1">
               {isAuthenticated ? (
