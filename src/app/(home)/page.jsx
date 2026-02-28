@@ -7,6 +7,7 @@ import logo from '@/assets/images/logo.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import TopNavbar from '@/components/TopNavbar';
 // --- Components ---
 function HeroBackground() {
   return (
@@ -163,78 +164,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#050505] text-slate-100 font-sans selection:bg-[#7080FF]/30 overflow-x-hidden">
       {/* Navigation */}
-      <nav className="fixed w-full z-50 bg-black/50 backdrop-blur-md border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 h-28 flex items-center justify-between">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 cursor-pointer"
-          >
-            <Image src={logo} alt="Zifto Logo" className="h-10 object-contain" />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400"
-          >
-            {isAuthenticated ? (
-              <>
-                <Link href="/create-storybook" className="hover:text-white transition-colors w-max">Create Storybook</Link>
-                <Link href="/my-storybooks" className="hover:text-white transition-colors w-max">My Storybooks</Link>
-                <Link href="/buy-credits" className="hover:text-white transition-colors w-max">Buy Credits</Link>
-              </>
-            ) : (
-              <>
-                <a href="#features" className="hover:text-white transition-colors w-max">Features</a>
-                <a href="#how-it-works" className="hover:text-white transition-colors w-max">How it Works</a>
-                <a href="#pricing" className="hover:text-white transition-colors w-max">Pricing</a>
-              </>
-            )}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4"
-          >
-            {isAuthenticated ? (
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/10 hover:border-[#7080FF]/50 transition-colors">
-                  <Coins className="text-yellow-400 w-4 h-4" />
-                  <span className="text-white text-sm font-medium">{userCredits}</span>
-                  <Link href="/buy-credits" className="w-5 h-5 flex items-center justify-center rounded-full bg-[#7080FF]/20 text-[#7080FF] hover:bg-[#7080FF] hover:text-white transition-all">
-                    <Plus className="w-3 h-3" />
-                  </Link>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center justify-center gap-2 bg-red-500/10 text-red-500 py-1.5 px-4 rounded-full hover:bg-red-500 hover:text-white transition-all duration-300 text-sm font-semibold"
-                >
-                  <LogOut className="h-4 w-4" /> Logout
-                </button>
-              </div>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors relative group"
-                >
-                  <span>Log In</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#7080FF] transition-all group-hover:w-full" />
-                </Link>
-                <Link
-                  href="/register"
-                  className="group relative px-6 py-2.5 text-sm font-bold bg-white text-black rounded-full overflow-hidden transition-transform hover:scale-105"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
-                  <span className="relative z-10">Get Started</span>
-                </Link>
-              </>
-            )}
-          </motion.div>
-        </div>
-      </nav>
+      <TopNavbar navLinks={[]} />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
@@ -479,9 +409,9 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {[
-              { name: "Starter", price: "₹499", credits: "100 Credits", features: ["100 AI generation credits", "Valid for 30 days", "Standard support", "Community access"] },
-              { name: "Professional", price: "₹1499", credits: "350 Credits", features: ["350 AI generation credits", "Valid for 60 days", "Priority support", "Advanced features"], popular: true },
-              { name: "Enterprise", price: "₹2999", credits: "1000 Credits", features: ["1000 AI generation credits", "Valid for 90 days", "24/7 Dedicated support", "Premium features"] }
+              { name: "Starter", price: "₹49", credits: "50 Credits", features: ["50 AI generation credits", "Valid for 30 days", "Standard support", "Community access"] },
+              { name: "Professional", price: "₹99", credits: "105 Credits", features: ["105 AI generation credits", "Valid for 60 days", "Priority support", "Advanced features"], popular: true },
+              { name: "Enterprise", price: "₹149", credits: "160 Credits", features: ["160 AI generation credits", "Valid for 90 days", "24/7 Dedicated support", "Premium features"] }
             ].map((plan, i) => (
               <div key={i} className={`relative p-8 rounded-3xl border flex flex-col ${plan.popular
                 ? 'bg-[#7080FF]/5 border-[#7080FF]/50 shadow-[0_0_30px_-10px_rgba(112,128,255,0.2)]'

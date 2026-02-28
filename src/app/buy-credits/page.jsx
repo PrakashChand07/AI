@@ -13,11 +13,11 @@ import { navLinks } from "../(home)/data";
 const creditPlans = [
     {
         name: "Starter",
-        price: 499,
-        credits: 100,
+        price: 49,
+        credits: 50,
         isPopular: false,
         features: [
-            "100 AI generation credits",
+            "50 AI generation credits",
             "Valid for 30 days",
             "Standard support",
             "Community access"
@@ -26,10 +26,10 @@ const creditPlans = [
     {
         name: "Professional",
         isPopular: true,
-        price: 1499,
-        credits: 350,
+        price: 99,
+        credits: 105,
         features: [
-            "350 AI generation credits",
+            "105 AI generation credits",
             "Valid for 60 days",
             "Priority support",
             "Advanced features"
@@ -37,11 +37,11 @@ const creditPlans = [
     },
     {
         name: "Enterprise",
-        price: 2999,
-        credits: 1000,
+        price: 149,
+        credits: 160,
         isPopular: false,
         features: [
-            "1000 AI generation credits",
+            "160 AI generation credits",
             "Valid for 90 days",
             "24/7 Dedicated support",
             "Premium features"
