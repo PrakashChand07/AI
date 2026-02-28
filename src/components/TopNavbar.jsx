@@ -12,29 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const TopNavbar = ({ navLinks = [] }) => {
   const router = useRouter();
   const { user, isAuthenticated, loading, logout, updateUser } = useAuth();
-  const [userCredits, setUserCredits] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (user?.credits !== undefined) {
-      setUserCredits(user.credits);
-    }
-  }, [user]);
-
-  // Listen for credits-updated event
-  useEffect(() => {
-    const handleCreditsUpdate = (e) => {
-      if (e.detail?.credits !== undefined) {
-        setUserCredits(e.detail.credits);
-      }
-    };
-
-    window.addEventListener('credits-updated', handleCreditsUpdate);
-
-    return () => {
-      window.removeEventListener('credits-updated', handleCreditsUpdate);
-    };
-  }, []);
 
   const handleLogout = () => {
     logout();
@@ -68,18 +46,20 @@ const TopNavbar = ({ navLinks = [] }) => {
           animate={{ opacity: 1, y: 0 }}
           className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-medium text-slate-400"
         >
-          {isAuthenticated ? (
-            <>
-              <Link href="/create-storybook" className="hover:text-white transition-colors w-max">Create Storybook</Link>
-              <Link href="/my-storybooks" className="hover:text-white transition-colors w-max">My Storybooks</Link>
-              <Link href="/buy-credits" className="hover:text-white transition-colors w-max">Buy Credits</Link>
-            </>
-          ) : (
-            <>
-              <Link href="/#features" className="hover:text-white transition-colors w-max">Features</Link>
-              <Link href="/#how-it-works" className="hover:text-white transition-colors w-max">How it Works</Link>
-              <Link href="/#pricing" className="hover:text-white transition-colors w-max">Pricing</Link>
-            </>
+          {!loading && (
+            isAuthenticated ? (
+              <>
+                <Link href="/create-storybook" className="hover:text-white transition-colors w-max">Create Storybook</Link>
+                <Link href="/my-storybooks" className="hover:text-white transition-colors w-max">My Storybooks</Link>
+                <Link href="/buy-credits" className="hover:text-white transition-colors w-max">Buy Credits</Link>
+              </>
+            ) : (
+              <>
+                <Link href="/#features" className="hover:text-white transition-colors w-max">Features</Link>
+                <Link href="/#how-it-works" className="hover:text-white transition-colors w-max">How it Works</Link>
+                <Link href="/#pricing" className="hover:text-white transition-colors w-max">Pricing</Link>
+              </>
+            )
           )}
         </motion.div>
 
@@ -89,7 +69,7 @@ const TopNavbar = ({ navLinks = [] }) => {
           {!loading && isAuthenticated && (
             <Link href="/buy-credits" className="md:hidden flex items-center gap-1.5 px-3 py-1.5 bg-[#7080FF]/10 rounded-full border border-[#7080FF]/30 text-[#7080FF] hover:bg-[#7080FF]/25 shadow-[0_0_15px_-5px_rgba(112,128,255,0.3)] transition-all">
               <Coins className="w-3.5 h-3.5" />
-              <span className="text-xs font-bold">{userCredits}</span>
+              <span className="text-xs font-bold">{user?.credits || 0}</span>
             </Link>
           )}
 
@@ -104,7 +84,7 @@ const TopNavbar = ({ navLinks = [] }) => {
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/10 hover:border-[#7080FF]/50 transition-colors">
                     <Coins className="text-yellow-400 w-4 h-4" />
-                    <span className="text-white text-sm font-medium">{userCredits}</span>
+                    <span className="text-white text-sm font-medium">{user?.credits || 0}</span>
                     <Link href="/buy-credits" className="w-5 h-5 flex items-center justify-center rounded-full bg-[#7080FF]/20 text-[#7080FF] hover:bg-[#7080FF] hover:text-white transition-all">
                       <Plus className="w-3 h-3" />
                     </Link>

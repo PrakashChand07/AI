@@ -22,6 +22,7 @@ export const getDataFromToken = (request) => {
         const decodedToken = jwt.verify(token, process.env.TOKEN_SECRET || process.env.JWT_ACCESS_SECRET);
         return decodedToken.id || decodedToken.userId;
     } catch (error) {
-        throw new Error(error.message);
+        console.error("Token validation error:", error.message);
+        return null; // Gracefully handle expired/invalid tokens by returning null (triggers 401)
     }
 }

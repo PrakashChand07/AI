@@ -9,10 +9,12 @@ import { navLinks } from "../(home)/data";
 import IconifyIcon from "@/components/wrappers/IconifyIcon";
 import { cn } from "@/helpers/cn";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 const CreateStorybookPage = () => {
     const router = useRouter();
+    const { user, isAuthenticated, loading: authLoading, updateUser } = useAuth();
     const [loading, setLoading] = useState(true);
-    const [userCredits, setUserCredits] = useState(0);
     const [imageFile, setImageFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [generating, setGenerating] = useState(false);
@@ -29,27 +31,19 @@ const CreateStorybookPage = () => {
 
     const creditCost = Number(formData.pages) || 0;
 
-    const checkAuth = useCallback(async () => {
-        try {
-            const response = await fetch("/api/auth/me");
-            if (response.ok) {
-                const data = await response.json();
-                setUserCredits(data.data.credits || 0);
-            } else {
+    useEffect(() => {
+        if (!authLoading) {
+            if (!isAuthenticated) {
                 router.push("/login?redirect=/create-storybook");
+            } else {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error("Auth check failed:", error);
-            router.push("/login?redirect=/create-storybook");
-        } finally {
-            setLoading(false);
         }
-    }, [router]);
+    }, [authLoading, isAuthenticated, router, user]);
 
     useEffect(() => {
-        checkAuth();
         fetchRecentStorybooks();
-    }, [checkAuth]);
+    }, []);
 
     const fetchRecentStorybooks = async () => {
         try {
@@ -80,7 +74,7 @@ const CreateStorybookPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (userCredits < creditCost) {
+        if ((user?.credits || 0) < creditCost) {
             // Show credit warning handled by render
             return;
         }
@@ -128,13 +122,11 @@ const CreateStorybookPage = () => {
             // Update credits from server (accurate value from DB)
             const newCredits = generateData.remainingCredits;
             if (newCredits !== undefined) {
-                setUserCredits(newCredits);
-                // Notify navbar to update credits in real-time
-                window.dispatchEvent(new CustomEvent('credits-updated', { detail: { credits: newCredits } }));
+                if (user) updateUser({ ...user, credits: newCredits });
             } else {
                 // Fallback: deduct locally
-                setUserCredits(prev => prev - creditCost);
-                window.dispatchEvent(new CustomEvent('credits-updated'));
+                const fallBackCredits = (user?.credits || 0) - creditCost;
+                if (user) updateUser({ ...user, credits: fallBackCredits });
             }
 
             // Refresh recent list to show the new one
@@ -173,7 +165,7 @@ const CreateStorybookPage = () => {
             <TopNavbar navLinks={navLinks} />
 
             {/* Credit Warning Modal */}
-            {userCredits < creditCost && (
+            {(user?.credits || 0) < creditCost && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="bg-slate-900 border border-white/10 rounded-2xl p-8 max-w-md w-full text-center relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
@@ -183,7 +175,7 @@ const CreateStorybookPage = () => {
                         <h3 className="text-2xl font-bold text-white mb-2">Insufficient Credits</h3>
                         <p className="text-default-300 mb-6">
                             You need <span className="text-white font-bold">{creditCost} credits</span> to generate a {formData.pages}-page storybook.
-                            Your current balance is <span className="text-red-400 font-bold">{userCredits} credits</span>.
+                            Your current balance is <span className="text-red-400 font-bold">{user?.credits || 0} credits</span>.
                         </p>
                         <button
                             onClick={() => router.push('/buy-credits')}
@@ -340,7 +332,7 @@ const CreateStorybookPage = () => {
                                 {/* Submit Button */}
                                 <button
                                     type="submit"
-                                    disabled={userCredits < creditCost || generating || formData.pages < 1}
+                                    disabled={(user?.credits || 0) < creditCost || generating || formData.pages < 1}
                                     className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-primary to-purple-600 hover:from-primary-hover hover:to-purple-500 text-white font-bold text-lg shadow-lg shadow-primary/20 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                                 >
                                     {generating ? (

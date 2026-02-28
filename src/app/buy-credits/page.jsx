@@ -95,34 +95,26 @@ const CreditPlanCard = ({ plan, onBuy }) => {
     );
 };
 
+import { useAuth } from "@/contexts/AuthContext";
+
 const BuyCreditsPage = () => {
     const router = useRouter();
+    const { user, isAuthenticated, loading: authLoading, updateUser } = useAuth();
     const [loading, setLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userCredits, setUserCredits] = useState(0);
     const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
-    const checkAuth = useCallback(async () => {
-        try {
-            const response = await fetch("/api/auth/me");
-            if (response.ok) {
-                const data = await response.json();
-                setIsAuthenticated(true);
-                setUserCredits(data.data.credits || 0);
-            } else {
-                router.push("/login?redirect=/buy-credits");
-            }
-        } catch (error) {
-            console.error("Auth check failed:", error);
-            router.push("/login?redirect=/buy-credits");
-        } finally {
-            setLoading(false);
-        }
-    }, [router]);
-
     useEffect(() => {
-        checkAuth();
-    }, [checkAuth]);
+        if (!authLoading) {
+            if (!isAuthenticated) {
+                router.push("/login?redirect=/buy-credits");
+            } else {
+                setLoading(false);
+                if (typeof window !== 'undefined' && window.Razorpay) {
+                    setRazorpayLoaded(true);
+                }
+            }
+        }
+    }, [authLoading, isAuthenticated, router, user]);
 
     const handleBuyCredits = async (plan) => {
         try {
@@ -160,8 +152,8 @@ const BuyCreditsPage = () => {
             }
 
             // Get Razorpay key from environment (client-side)
-            const razorpayKeyId = "rzp_test_RoEcBlIurf0WPe"; // Hardcoded for now since env might not work
-            console.log("Razorpay Key ID:", razorpayKeyId);
+            const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_RoEcBlIurf0WPe";
+            console.log("Razorpay Key ID loaded");
 
             const options = {
                 key: razorpayKeyId,
@@ -193,9 +185,11 @@ const BuyCreditsPage = () => {
                         if (verifyResponse.ok) {
                             const data = await verifyResponse.json();
                             alert(`Payment successful! ${plan.credits} credits added to your account.`);
-                            setUserCredits(data.credits);
-                            // Notify navbar to update credits in real-time
-                            window.dispatchEvent(new CustomEvent('credits-updated', { detail: { credits: data.credits } }));
+
+                            if (user) {
+                                updateUser({ ...user, credits: data.credits });
+                            }
+
                             router.push("/");
                         } else {
                             const errorData = await verifyResponse.json();
@@ -256,7 +250,7 @@ const BuyCreditsPage = () => {
                         <div className="mt-6 inline-block bg-primary/10 border border-primary/20 rounded-lg px-6 py-3">
                             <p className="text-white">
                                 <span className="font-semibold">Current Balance:</span>{" "}
-                                <span className="text-primary text-xl font-bold">{userCredits}</span> credits
+                                <span className="text-primary text-xl font-bold">{user?.credits || 0}</span> credits
                             </p>
                         </div>
                     </div>
