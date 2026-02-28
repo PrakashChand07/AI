@@ -8,45 +8,35 @@ import logo from '@/assets/images/logo.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import ThirdPartyLogin from '@/components/ThirdPartyLogin';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'react-hot-toast';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [user, setUser] = useState({
     email: '',
     password: ''
   });
 
+  const { loginMutation } = useAuth();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setLoading(true);
-      setError("");
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
-      const data = await response.json();
-      if (data.success) {
-        console.log("Login success", data);
+    setError("");
+    loginMutation.mutate(user, {
+      onSuccess: () => {
         router.push(redirect);
-      } else {
-        console.log("Login failed", data.error);
-        setError(data.error || "Login failed");
+      },
+      onError: (err) => {
+        const message = err.response?.data?.error || err.message || "Login failed";
+        setError(message);
+        toast.error(message);
       }
-    } catch (err) {
-      console.log("Login failed", err.message);
-      setError("Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   return (
@@ -138,11 +128,11 @@ function LoginContent() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
-                  disabled={loading}
+                  disabled={loginMutation.isPending}
                   className="w-full bg-[#7080FF] hover:bg-[#5e6ce6] text-white font-bold py-3 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(112,128,255,0.4)] flex items-center justify-center gap-2 mt-6 relative overflow-hidden group/btn text-sm"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:animate-shimmer" />
-                  {loading ? (
+                  {loginMutation.isPending ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <>

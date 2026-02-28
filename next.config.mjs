@@ -1,5 +1,8 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
+    // Allows dev environment to accept traffic from local IP address
+    experimental: {
+        allowedDevOrigins: ["192.168.0.160", "localhost", "127.0.0.1", "192.168.0.160:3000"],
+    },
     images: {
         remotePatterns: [
             {

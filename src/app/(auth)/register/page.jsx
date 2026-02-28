@@ -8,10 +8,10 @@ import logo from '@/assets/images/logo.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import ThirdPartyLogin from '@/components/ThirdPartyLogin';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Register() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [user, setUser] = useState({
     username: '',
@@ -19,6 +19,8 @@ export default function Register() {
     password: ''
   });
   const [buttonDisabled, setButtonDisabled] = useState(true);
+
+  const { registerMutation } = useAuth();
 
   useEffect(() => {
     if (user.username.length > 0 && user.email.length > 0 && user.password.length > 0) {
@@ -30,31 +32,20 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setLoading(true);
-      setError("");
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
-      const data = await response.json();
-      console.log("Signup success", data);
+    setError("");
 
-      if (data.success) {
-        router.push(`/verifyemail?email=${encodeURIComponent(user.email)}`);
-      } else {
-        console.log("Signup failed", data.error);
-        setError(data.error);
+    registerMutation.mutate(user, {
+      onSuccess: (data) => {
+        if (data.success || data.message) {
+          router.push(`/verifyemail?email=${encodeURIComponent(user.email)}`);
+        } else {
+          setError(data.error || "Signup failed");
+        }
+      },
+      onError: (err) => {
+        setError(err.response?.data?.error || "Signup failed. Please try again.");
       }
-    } catch (err) {
-      console.log("Signup failed", err.message);
-      setError("Signup failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   return (
@@ -160,11 +151,11 @@ export default function Register() {
                   whileHover={!buttonDisabled ? { scale: 1.02 } : {}}
                   whileTap={!buttonDisabled ? { scale: 0.98 } : {}}
                   type="submit"
-                  disabled={buttonDisabled || loading}
+                  disabled={buttonDisabled || registerMutation.isPending}
                   className="w-full bg-[#7080FF] hover:bg-[#5e6ce6] text-white font-bold py-3 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(112,128,255,0.4)] flex items-center justify-center gap-2 mt-6 relative overflow-hidden group/btn disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   {!buttonDisabled && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:animate-shimmer" />}
-                  {loading ? (
+                  {registerMutation.isPending ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <>

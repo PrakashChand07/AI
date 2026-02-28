@@ -22,7 +22,8 @@ export async function GET(request) {
 
         return NextResponse.json({
             message: "User found",
-            data: user
+            data: user,
+            user, // Include user root key mapping for React Query context
         })
     } catch (error) {
         return NextResponse.json({ error: error.message }, { status: 400 })

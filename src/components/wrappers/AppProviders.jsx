@@ -1,14 +1,17 @@
 "use client";
 
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Aos from 'aos';
 import { usePathname } from "next/navigation";
 import BackToTop from "../BackToTop";
-import { SessionProvider } from "next-auth/react";
-import GoogleAuthSync from "../GoogleAuthSync";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { Toaster } from 'react-hot-toast';
 
 const AppProviders = ({ children }) => {
   const pathname = usePathname();
+  const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
     Aos.init();
@@ -41,13 +44,17 @@ const AppProviders = ({ children }) => {
   }, [pathname]);
 
   return (
-    <SessionProvider>
-      <GoogleAuthSync />
-      <Fragment>
-        {children}
-        <BackToTop />
-      </Fragment>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "892732192223-8u2cfmgdcdg162gouj43rngkbket6vht.apps.googleusercontent.com"}>
+        <AuthProvider>
+          <Fragment>
+            <Toaster position="top-right" />
+            {children}
+            <BackToTop />
+          </Fragment>
+        </AuthProvider>
+      </GoogleOAuthProvider>
+    </QueryClientProvider>
   );
 };
 

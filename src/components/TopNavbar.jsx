@@ -1,72 +1,42 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from 'framer-motion';
 import { Coins, Plus, LogOut, Menu } from 'lucide-react';
 import logo from '@/assets/images/logo.png';
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 const TopNavbar = ({ navLinks = [] }) => {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { user, isAuthenticated, loading, logout, updateUser } = useAuth();
   const [userCredits, setUserCredits] = useState(0);
 
-  // Refresh credits from API
-  const refreshCredits = useCallback(async () => {
-    try {
-      const response = await fetch("/api/auth/me");
-      if (response.ok) {
-        const data = await response.json();
-        setUserCredits(data.data.credits || 0);
-      }
-    } catch (error) {
-      console.error("Credits refresh failed", error);
-    }
-  }, []);
-
   useEffect(() => {
-    checkAuth();
-    // Listen for credits-updated event
+    if (user?.credits !== undefined) {
+      setUserCredits(user.credits);
+    }
+  }, [user]);
+
+  // Listen for credits-updated event
+  useEffect(() => {
     const handleCreditsUpdate = (e) => {
       if (e.detail?.credits !== undefined) {
         setUserCredits(e.detail.credits);
-      } else {
-        refreshCredits();
       }
     };
+
     window.addEventListener('credits-updated', handleCreditsUpdate);
 
     return () => {
       window.removeEventListener('credits-updated', handleCreditsUpdate);
     };
-  }, [refreshCredits]);
+  }, []);
 
-  const checkAuth = async () => {
-    try {
-      const response = await fetch("/api/auth/me");
-      if (response.ok) {
-        const data = await response.json();
-        setIsAuthenticated(true);
-        setUserCredits(data.data.credits || 0);
-      }
-    } catch (error) {
-      console.error("Auth check failed", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout");
-      setIsAuthenticated(false);
-      window.location.href = "/login";
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
+  const handleLogout = () => {
+    logout();
   };
 
   return (
