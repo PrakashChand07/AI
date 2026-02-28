@@ -174,8 +174,19 @@ const MyStorybooksPage = () => {
                                             </p>
 
                                             <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                                                <div className="text-xs text-default-500">
-                                                    {book.pages} Pages • {book.characterName}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="text-xs text-default-500">
+                                                        {book.pages} Pages • {book.characterName}
+                                                    </div>
+                                                    <a
+                                                        href="https://zifto.in/?srsltid=AfmBOooxuF6i6-pGBW8t2xheNaYoGBNlxSsDG90E77fxJFcGqiHODUIe"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-2 py-1 bg-primary border border-primary/50 hover:bg-primary-hover text-white rounded text-[10px] font-bold tracking-wide transition-all shadow-[0_0_10px_rgba(var(--primary),0.3)] flex items-center gap-1"
+                                                    >
+                                                        <IconifyIcon icon="lucide:printer" className="w-3 h-3" />
+                                                        Print Pdf
+                                                    </a>
                                                 </div>
 
                                                 {book.status === 'completed' && book.pdfUrl ? (
