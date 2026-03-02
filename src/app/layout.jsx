@@ -5,6 +5,7 @@ import { DEFAULT_PAGE_TITLE } from "@/common/constants";
 import Image from "next/image";
 import 'aos/dist/aos.css';
 import "../assets/css/style.css";
+import MainFooter from "@/components/MainFooter";
 const jostSans = Jost({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
@@ -65,6 +66,7 @@ export default function RootLayout({
       <div id="__next_splash">
         <AppProviders>
           {children}
+          <MainFooter />
         </AppProviders>
       </div>
     </body>

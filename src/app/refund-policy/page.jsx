@@ -4,7 +4,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ShieldAlert, CreditCard, Clock, CheckCircle2, Mail, Info } from 'lucide-react';
 import TopNavbar from '@/components/TopNavbar';
-import MainFooter from '@/components/MainFooter';
 
 const RefundPolicy = () => {
     const containerVariants = {
@@ -160,8 +159,6 @@ const RefundPolicy = () => {
                     </motion.div>
                 </div>
             </section>
-
-            <MainFooter />
         </div>
     );
 };

@@ -4,7 +4,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Eye, Lock, UserCheck, Mail, Info, FileText } from 'lucide-react';
 import TopNavbar from '@/components/TopNavbar';
-import MainFooter from '@/components/MainFooter';
 
 const PrivacyPolicy = () => {
     const containerVariants = {
@@ -216,8 +215,6 @@ const PrivacyPolicy = () => {
                     </motion.div>
                 </div>
             </section>
-
-            <MainFooter />
         </div>
     );
 };

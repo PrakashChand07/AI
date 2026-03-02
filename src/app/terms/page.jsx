@@ -4,7 +4,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Gavel, Scale, Globe, FileText, Info, Mail, AlertTriangle } from 'lucide-react';
 import TopNavbar from '@/components/TopNavbar';
-import MainFooter from '@/components/MainFooter';
 
 const TermsOfService = () => {
     const containerVariants = {
@@ -178,8 +177,6 @@ const TermsOfService = () => {
                     </motion.div>
                 </div>
             </section>
-
-            <MainFooter />
         </div>
     );
 };
