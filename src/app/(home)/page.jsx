@@ -550,9 +550,10 @@ export default function Home() {
             <div>
               <h4 className="font-bold mb-6 text-white">Company</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                {/* <li><Link href="/brand" className="hover:text-white transition-colors">About Us</Link></li> */}
+                <li><Link href="/terms" className="hover:text-white transition-colors hover:text-[#7080FF]">Terms of Service</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors hover:text-[#7080FF]">Privacy Policy</Link></li>
+                <li><Link href="/refund-policy" className="hover:text-white transition-colors hover:text-[#7080FF]">Refund Policy</Link></li>
                 <li><a href="https://zifto.in" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Zifto.in</a></li>
               </ul>
             </div>
