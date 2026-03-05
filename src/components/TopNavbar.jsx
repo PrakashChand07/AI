@@ -58,6 +58,7 @@ const TopNavbar = ({ navLinks = [] }) => {
                 <Link href="/#features" className="hover:text-white transition-colors w-max">Features</Link>
                 <Link href="/#how-it-works" className="hover:text-white transition-colors w-max">How it Works</Link>
                 <Link href="/#pricing" className="hover:text-white transition-colors w-max">Pricing</Link>
+                <Link href="/contact" className="hover:text-white transition-colors w-max">Contact</Link>
               </>
             )
           )}
@@ -151,6 +152,7 @@ const TopNavbar = ({ navLinks = [] }) => {
                   <Link onClick={() => setIsMobileMenuOpen(false)} href="/#features" className="flex items-center gap-3 text-sm font-medium text-slate-300 hover:text-white bg-transparent hover:bg-white/5 py-3.5 px-4 rounded-2xl transition-all">Features</Link>
                   <Link onClick={() => setIsMobileMenuOpen(false)} href="/#how-it-works" className="flex items-center gap-3 text-sm font-medium text-slate-300 hover:text-white bg-transparent hover:bg-white/5 py-3.5 px-4 rounded-2xl transition-all">How it Works</Link>
                   <Link onClick={() => setIsMobileMenuOpen(false)} href="/#pricing" className="flex items-center gap-3 text-sm font-medium text-slate-300 hover:text-white bg-transparent hover:bg-white/5 py-3.5 px-4 rounded-2xl transition-all">Pricing</Link>
+                  <Link onClick={() => setIsMobileMenuOpen(false)} href="/contact" className="flex items-center gap-3 text-sm font-medium text-slate-300 hover:text-white bg-transparent hover:bg-white/5 py-3.5 px-4 rounded-2xl transition-all">Contact</Link>
                   <div className="grid grid-cols-2 gap-2 mt-2 p-2 pt-0">
                     <Link
                       onClick={() => setIsMobileMenuOpen(false)}

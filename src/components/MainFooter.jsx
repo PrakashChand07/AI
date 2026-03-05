@@ -59,6 +59,8 @@ const MainFooter = () => {
                             <li><Link href="/terms" className="hover:text-[#7080FF] transition-colors">Terms of Service</Link></li>
                             <li><Link href="/privacy" className="hover:text-[#7080FF] transition-colors">Privacy Policy</Link></li>
                             <li><Link href="/refund-policy" className="hover:text-[#7080FF] transition-colors">Refund Policy</Link></li>
+                            <li><Link href="/shipping-policy" className="hover:text-[#7080FF] transition-colors">Shipping Policy</Link></li>
+                            <li><Link href="/contact" className="hover:text-[#7080FF] transition-colors">Contact Us</Link></li>
                             <li><a href="https://zifto.in" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Zifto.in</a></li>
                         </ul>
                     </div>
