@@ -62,6 +62,10 @@ export async function POST(request) {
         // For now, assuming standard environment or long-running capability.
 
         try {
+            if (!process.env.ZIFTO_API_URL) {
+                throw new Error("ZIFTO_API_URL is not defined in environment variables");
+            }
+
             const ziftoResponse = await fetch(process.env.ZIFTO_API_URL, {
                 method: "POST",
                 headers: {

@@ -113,12 +113,11 @@ const MyStorybooksPage = () => {
                                     >
                                         {/* Cover Image */}
                                         <div className="relative h-64 w-full bg-slate-900">
-                                            {book.coverImageUrl ? (
-                                                <Image
-                                                    src={book.coverImageUrl}
-                                                    alt={book.title}
-                                                    fill
-                                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                            {book?.coverImageUrl ? (
+                                                <img
+                                                    src={book?.coverImageUrl}
+                                                    alt={book?.title}
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                                                 />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full text-default-500">
