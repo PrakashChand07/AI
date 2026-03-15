@@ -9,11 +9,19 @@ import TopNavbar from "@/components/TopNavbar";
 import { navLinks } from "../(home)/data";
 import IconifyIcon from "@/components/wrappers/IconifyIcon";
 import { cn } from "@/helpers/cn";
+import PrintModal from "@/components/PrintModal";
 
 const MyStorybooksPage = () => {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [storybooks, setStorybooks] = useState([]);
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    const [selectedBook, setSelectedBook] = useState(null);
+
+    const handleOpenPrintModal = (book) => {
+        setSelectedBook(book);
+        setIsPrintModalOpen(true);
+    };
 
     const fetchStorybooks = useCallback(async () => {
         try {
@@ -177,15 +185,16 @@ const MyStorybooksPage = () => {
                                                     <div className="text-xs text-default-500">
                                                         {book.pages} Pages • {book.characterName}
                                                     </div>
-                                                    <a
-                                                        href="https://zifto.in/?srsltid=AfmBOooxuF6i6-pGBW8t2xheNaYoGBNlxSsDG90E77fxJFcGqiHODUIe"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-2 py-1 bg-primary border border-primary/50 hover:bg-primary-hover text-white rounded text-[10px] font-bold tracking-wide transition-all shadow-[0_0_10px_rgba(var(--primary),0.3)] flex items-center gap-1"
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleOpenPrintModal(book);
+                                                        }}
+                                                        className="px-2 py-1 bg-primary border border-primary/50 hover:bg-primary-hover text-white rounded text-[10px] font-bold tracking-wide transition-all shadow-[0_0_10px_rgba(var(--primary),0.3)] flex items-center gap-1 cursor-pointer"
                                                     >
                                                         <IconifyIcon icon="lucide:printer" className="w-3 h-3" />
                                                         Print Pdf
-                                                    </a>
+                                                    </button>
                                                 </div>
 
                                                 {book.status === 'completed' && book.pdfUrl ? (
@@ -232,6 +241,16 @@ const MyStorybooksPage = () => {
                     )}
                 </div>
             </section>
+
+            <PrintModal
+                isOpen={isPrintModalOpen}
+                onClose={() => {
+                    setIsPrintModalOpen(false);
+                    setSelectedBook(null);
+                }}
+                bookTitle={selectedBook?.title || ""}
+                pdfUrl={selectedBook?.pdfUrl || ""}
+            />
         </>
     );
 };
