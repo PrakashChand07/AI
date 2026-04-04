@@ -20,7 +20,7 @@ export async function POST(request) {
             age,
             gender,
             pages,
-            uploaded_image_url
+            uploaded_image_urls
         } = reqBody;
 
         const numPages = Number(pages);
@@ -72,7 +72,7 @@ export async function POST(request) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    uploaded_image_url,
+                    uploaded_image_urls,
                     storyline,
                     character_name,
                     age,

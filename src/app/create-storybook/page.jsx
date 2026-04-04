@@ -15,8 +15,8 @@ const CreateStorybookPage = () => {
     const router = useRouter();
     const { user, isAuthenticated, loading: authLoading, updateUser } = useAuth();
     const [loading, setLoading] = useState(true);
-    const [imageFile, setImageFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
+    const [imageFiles, setImageFiles] = useState([]);
+    const [previewUrls, setPreviewUrls] = useState([]);
     const [generating, setGenerating] = useState(false);
     const [recentStorybooks, setRecentStorybooks] = useState([]);
 
@@ -59,13 +59,25 @@ const CreateStorybookPage = () => {
     };
 
     const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setImageFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            setImageFiles(prev => [...prev, ...files]);
+            const newPreviews = files.map(file => URL.createObjectURL(file));
+            setPreviewUrls(prev => [...prev, ...newPreviews]);
         }
     };
 
+    const removeImage = (index, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setImageFiles(prev => prev.filter((_, i) => i !== index));
+        setPreviewUrls(prev => {
+            const urls = [...prev];
+            URL.revokeObjectURL(urls[index]);
+            urls.splice(index, 1);
+            return urls;
+        });
+    };
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: name === 'pages' ? (value === '' ? '' : parseInt(value)) : value }));
@@ -79,27 +91,30 @@ const CreateStorybookPage = () => {
             return;
         }
 
-        if (!imageFile) {
-            alert("Please upload a child's photo");
+        if (imageFiles.length === 0) {
+            alert("Please upload at least one photo");
             return;
         }
 
         try {
             setGenerating(true);
 
-            // 1. Upload Image
-            const uploadFormData = new FormData();
-            uploadFormData.append("file", imageFile);
+            // 1. Upload Images
+            const imageUrls = [];
+            for (const file of imageFiles) {
+                const uploadFormData = new FormData();
+                uploadFormData.append("file", file);
 
-            const uploadResponse = await fetch("/api/upload", {
-                method: "POST",
-                body: uploadFormData
-            });
+                const uploadResponse = await fetch("/api/upload", {
+                    method: "POST",
+                    body: uploadFormData
+                });
 
-            if (!uploadResponse.ok) throw new Error("Image upload failed");
+                if (!uploadResponse.ok) throw new Error(`Image upload failed for ${file.name}`);
 
-            const uploadData = await uploadResponse.json();
-            const imageUrl = uploadData.url;
+                const uploadData = await uploadResponse.json();
+                imageUrls.push(uploadData.url);
+            }
 
             // 2. Generate Storybook
             const generateResponse = await fetch("/api/storybook/generate", {
@@ -107,7 +122,7 @@ const CreateStorybookPage = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...formData,
-                    uploaded_image_url: imageUrl
+                    uploaded_image_urls: imageUrls
                 })
             });
 
@@ -208,39 +223,58 @@ const CreateStorybookPage = () => {
                                 {/* Image Upload */}
                                 <div>
                                     <label className="block text-sm font-medium text-default-300 mb-2">
-                                        Child&apos;s Photo (Front Facing)
+                                        Upload Photos
                                     </label>
                                     <div className="relative group">
                                         <div className={cn(
-                                            "border-2 border-dashed border-white/10 rounded-xl p-8 transition-all text-center cursor-pointer hover:border-primary/50 hover:bg-white/5",
-                                            previewUrl ? "border-primary" : ""
+                                            "border-2 border-dashed border-white/10 rounded-xl p-8 transition-all text-center hover:border-primary/50 hover:bg-white/5",
+                                            previewUrls.length > 0 ? "border-primary" : ""
                                         )}>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleImageChange}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            />
-                                            {previewUrl ? (
-                                                <div className="relative h-48 w-full max-w-xs mx-auto">
-                                                    <Image
-                                                        src={previewUrl}
-                                                        alt="Preview"
-                                                        fill
-                                                        className="object-cover rounded-lg"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col items-center gap-3">
-                                                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                                                        <IconifyIcon icon="lucide:upload-cloud" className="w-6 h-6 text-default-400" />
+                                            <div className="relative w-full h-full">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    onChange={handleImageChange}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                                />
+                                                {previewUrls.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-4 justify-center relative z-10">
+                                                        {previewUrls.map((url, i) => (
+                                                            <div key={i} className="relative h-24 w-24 group/item">
+                                                                <Image
+                                                                    src={url}
+                                                                    alt={`Preview ${i}`}
+                                                                    fill
+                                                                    className="object-cover rounded-lg"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => removeImage(i, e)}
+                                                                    className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 text-white z-30 opacity-100 transition-opacity hover:bg-red-600"
+                                                                    style={{ pointerEvents: 'auto' }}
+                                                                >
+                                                                    <IconifyIcon icon="lucide:x" className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                        <div className="h-24 w-24 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center text-white/50 bg-white/5 transition-colors pointer-events-none">
+                                                            <IconifyIcon icon="lucide:plus" className="w-8 h-8 mb-1" />
+                                                            <span className="text-xs font-medium">Add More</span>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="text-white font-medium">Click to upload photo</p>
-                                                        <p className="text-xs text-default-400 mt-1">JPG, PNG up to 10MB</p>
+                                                ) : (
+                                                    <div className="flex flex-col items-center gap-3 relative z-10 pointer-events-none">
+                                                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                                                            <IconifyIcon icon="lucide:upload-cloud" className="w-6 h-6 text-default-400" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-white font-medium">Click or drag to upload photos</p>
+                                                            <p className="text-xs text-default-400 mt-1">JPG, PNG up to 10MB</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
