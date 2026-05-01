@@ -236,16 +236,20 @@ export default function Home() {
           {/* 3D Floating Showcase */}
           <div className="grid md:grid-cols-3 gap-8 perspective-1000 mb-20">
             {[
-              { title: "Cosmic Voyager", tag: "Sci-Fi", color: "#7080FF", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800" },
-              { title: "Enchanted Woods", tag: "Fantasy", color: "#d946ef", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=800" },
-              { title: "Deep Blue", tag: "Ocean", color: "#14b8a6", img: "https://images.unsplash.com/photo-1751879182448-d7b3dce2b00e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bmRlcndhdGVyJTIwZmFudGFzeSUyMG1hZ2ljYWwlMjBvY2VhbiUyMHdvcmxkJTIwY2hpbGRyZW4lMjBib29rJTIwaWxsdXN0cmF0aW9ufGVufDF8fHx8MTc3MDIwNjEwMnww&ixlib=rb-4.1.0&q=80&w=1080" }
+              { title: "Roy's Magical Adventure", tag: "Adventure", color: "#7080FF", img: "/image/Screenshot 2026-05-01 113651.png", pdf: "/uploads/Roy's Magical Adventure.pdf" },
+              { title: "Seema's Kind Kitchen", tag: "Kids", color: "#d946ef", img: "/image/Screenshot 2026-05-01 113714.png", pdf: "/uploads/Seema's Kind Kitchen.pdf" },
+              { title: "Sumit and the Fire Dragon", tag: "Fantasy", color: "#14b8a6", img: "/image/Screenshot 2026-05-01 113735.png", pdf: "/uploads/Sumit and the Fire Dragon.pdf" }
             ].map((item, i) => (
-              <motion.div
+              <motion.a
+                href={item.pdf}
+                download
+                target="_blank"
+                rel="noopener noreferrer"
                 key={i}
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + i * 0.1, duration: 0.5, ease: "easeOut" }}
-                className="relative group"
+                className="relative group block cursor-pointer"
               >
                 <div className="absolute -inset-0.5 bg-gradient-to-b from-white/20 to-transparent rounded-[20px] opacity-0 group-hover:opacity-100 transition duration-500 blur-sm" />
                 <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl">
@@ -262,7 +266,7 @@ export default function Home() {
                     <div className="h-1 w-12 rounded-full" style={{ backgroundColor: item.color }} />
                   </div>
                 </div>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
         </div>
